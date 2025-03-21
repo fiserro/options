@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-import io.github.fiserro.options.extension.impl.Envio;
+import io.github.fiserro.options.extension.Envio;
 import io.github.fiserro.options.test.OptionsNestedComposition;
 import io.github.fiserro.options.test.OptionsStrings;
 import java.util.Arrays;

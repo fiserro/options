@@ -14,7 +14,7 @@ public @interface Option {
 
   String description() default "";
 
-  boolean required() default false;
+//  boolean required() default false;
 
   String[] env() default {};
 

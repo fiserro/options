@@ -1,4 +1,4 @@
-package io.github.fiserro.options.extension.impl;
+package io.github.fiserro.options.extension;
 
 import java.util.Collections;
 import java.util.HashMap;

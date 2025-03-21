@@ -5,10 +5,11 @@ import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.github.fiserro.options.OptionsFactory;
+import io.github.fiserro.options.extension.validation.ValidateOptionsException;
 import io.github.fiserro.options.test.OptionsRequired;
 import org.junit.jupiter.api.Test;
 
-class ValidateRequiredOptionsTest {
+class JakartaValidatorOptionsTest {
 
   @Test
   void exceptionIsThrownWhenRequiredOptionIsNotSet() {

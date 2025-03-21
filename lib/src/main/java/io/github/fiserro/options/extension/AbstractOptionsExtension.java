@@ -1,8 +1,6 @@
-package io.github.fiserro.options.extension.impl;
+package io.github.fiserro.options.extension;
 
 import io.github.fiserro.options.Options;
-import io.github.fiserro.options.extension.OptionExtensionType;
-import io.github.fiserro.options.extension.OptionsExtension;
 import lombok.RequiredArgsConstructor;
 
 /**

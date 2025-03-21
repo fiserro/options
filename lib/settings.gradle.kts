@@ -1,5 +1,4 @@
 rootProject.name = "options"
-group = "io.github.fiserro"
 
 dependencyResolutionManagement {
     versionCatalogs {

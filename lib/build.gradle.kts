@@ -2,23 +2,24 @@ plugins {
     `java-library`
 }
 
+group = "io.github.fiserro"
+
 repositories {
     mavenCentral()
+    maven { url = uri("https://repo1.maven.org/maven2/") }
 }
 
 dependencies {
-    // This dependency is exported to consumers, that is to say found on their compile classpath.
-    api(libs.commons.math3)
-    api(libs.commons.lang3)
-
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
+    implementation(libs.commons.math3)
+    implementation(libs.commons.lang3)
     implementation(libs.guava)
     implementation(libs.slf4j.api)
     implementation(libs.logback.classic)
     implementation(libs.byte.buddy)
-    implementation(libs.vavr)
+//    implementation(libs.vavr)
     implementation(libs.dateparser)
     implementation(libs.lombok)
+    implementation(libs.jakarta.validation.api)
 
     testImplementation(libs.hamcrest)
     testImplementation(libs.lombok)

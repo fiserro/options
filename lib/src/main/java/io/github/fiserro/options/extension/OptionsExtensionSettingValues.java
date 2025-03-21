@@ -1,10 +1,9 @@
-package io.github.fiserro.options.extension.impl;
+package io.github.fiserro.options.extension;
 
 import com.google.common.base.Preconditions;
 import io.github.fiserro.options.OptionDef;
 import io.github.fiserro.options.Options;
 import io.github.fiserro.options.OptionsBuilder;
-import io.github.fiserro.options.extension.OptionExtensionType;
 import java.util.Arrays;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;

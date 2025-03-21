@@ -1,8 +1,7 @@
-package io.github.fiserro.options.extension.impl;
+package io.github.fiserro.options.extension;
 
 import io.github.fiserro.options.Options;
 import io.github.fiserro.options.OptionsBuilder;
-import io.github.fiserro.options.extension.OptionExtensionType;
 import java.util.stream.Stream;
 
 /**

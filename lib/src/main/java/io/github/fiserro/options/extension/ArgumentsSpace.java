@@ -1,8 +1,7 @@
-package io.github.fiserro.options.extension.impl;
+package io.github.fiserro.options.extension;
 
 import io.github.fiserro.options.Options;
 import io.github.fiserro.options.OptionsBuilder;
-import io.github.fiserro.options.extension.OptionExtensionType;
 
 /**
  * Extension that sets the value of the option from given program arguments. The arguments must be

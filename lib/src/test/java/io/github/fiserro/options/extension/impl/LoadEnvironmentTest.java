@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 import io.github.fiserro.options.OptionsFactory;
+import io.github.fiserro.options.extension.Envio;
 import io.github.fiserro.options.test.OptionsAll;
 import org.junit.jupiter.api.Test;
 

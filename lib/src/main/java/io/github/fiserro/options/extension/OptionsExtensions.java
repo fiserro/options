@@ -1,9 +1,6 @@
 package io.github.fiserro.options.extension;
 
-import io.github.fiserro.options.extension.impl.ArgumentsEquals;
-import io.github.fiserro.options.extension.impl.ArgumentsSpace;
-import io.github.fiserro.options.extension.impl.EnvironmentVariables;
-import io.github.fiserro.options.extension.impl.ValidateRequired;
+import io.github.fiserro.options.extension.validation.jakarta.JakartaValidator;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,7 +24,7 @@ import java.lang.annotation.Target;
  * @see ArgumentsEquals
  * @see ArgumentsSpace
  * @see EnvironmentVariables
- * @see ValidateRequired
+ * @see JakartaValidator
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

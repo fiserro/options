@@ -6,9 +6,9 @@ slf4j-api = "2.0.17"
 logback-classic = "1.5.18"
 byte-buddy = "1.17.2"
 lombok = "1.18.36"
-vavr = "0.10.6"
 hamcrest = "3.0"
 dateparser = "1.0.11"
+jakarta-validation-api = "3.1.1"
 
 [libraries]
 commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commons-math3" }
@@ -18,6 +18,6 @@ slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-classic" }
 byte-buddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byte-buddy" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
-vavr = { module = "io.vavr:vavr", version.ref = "vavr" }
 hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "hamcrest" }
 dateparser = { module = "com.github.sisyphsu:dateparser", version.ref = "dateparser" }
+jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation-api" }

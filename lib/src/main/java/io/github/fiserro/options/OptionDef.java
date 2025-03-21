@@ -18,7 +18,7 @@ import lombok.experimental.Delegate;
 @Builder(toBuilder = true)
 public record OptionDef(
     @Delegate Option option,
-    Method method,
+    @Delegate Method method,
     Method wither,
     Set<String> keys
 ) {
@@ -160,7 +160,7 @@ public record OptionDef(
    */
   public boolean strongEquals(OptionDef other) {
     return Objects.equals(javaType(), other.javaType()) &&
-        Objects.equals(option.required(), other.option.required()) &&
+        // validations?
         Objects.equals(option.parser(), other.option.parser());
   }
 

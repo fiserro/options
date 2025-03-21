@@ -1,6 +1,7 @@
 package io.github.fiserro.options.test;
 
 import io.github.fiserro.options.Option;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public interface OptionsDuplicates extends OptionsIntegers, OptionsStrings, OptionsEnum {
@@ -14,7 +15,8 @@ public interface OptionsDuplicates extends OptionsIntegers, OptionsStrings, Opti
     return 10;
   }
 
-  @Option(required = true)
+  @NotNull
+  @Option
   @Override
   Integer integer();
 

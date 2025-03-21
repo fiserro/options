@@ -8,9 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.github.fiserro.options.Options;
 import io.github.fiserro.options.extension.OptionExtensionScanner.IllegalExtensionException;
-import io.github.fiserro.options.extension.impl.ArgumentsEquals;
-import io.github.fiserro.options.extension.impl.ArgumentsSpace;
-import io.github.fiserro.options.extension.impl.EnvironmentVariables;
 import io.github.fiserro.options.test.OptionsOverridingExtension;
 import java.util.List;
 import java.util.NavigableMap;

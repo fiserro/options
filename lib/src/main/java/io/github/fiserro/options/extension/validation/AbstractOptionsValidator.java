@@ -1,12 +1,12 @@
-package io.github.fiserro.options.extension.impl;
+package io.github.fiserro.options.extension.validation;
 
 import io.github.fiserro.options.OptionDef;
 import io.github.fiserro.options.Options;
 import io.github.fiserro.options.OptionsBuilder;
-import io.github.fiserro.options.OptionsException;
+import io.github.fiserro.options.extension.AbstractOptionsExtension;
 import io.github.fiserro.options.extension.OptionExtensionType;
-import io.vavr.collection.Seq;
-import io.vavr.control.Validation;
+import jakarta.validation.ConstraintViolation;
+import java.util.Set;
 import lombok.val;
 
 /**
@@ -18,16 +18,15 @@ public abstract class AbstractOptionsValidator extends AbstractOptionsExtension 
     super(OptionExtensionType.VALIDATION, declaringClass);
   }
 
-  protected abstract Validation<Seq<OptionsException>, Seq<OptionDef>> validate(
+  protected abstract Set<ConstraintViolation<OptionDef>> validate(
       OptionsBuilder<? extends Options> options);
 
   @Override
   public void extend(OptionsBuilder<? extends Options> options) {
     val validation = validate(options);
-    if (validation.isInvalid()) {
+    if (!validation.isEmpty()) {
       // Could be improved by collecting validation from all validators in options factoring
       throw new ValidateOptionsException(validation, options);
     }
   }
-
 }
