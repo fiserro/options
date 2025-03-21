@@ -32,6 +32,7 @@ public abstract class AbstractOptions<T extends Options> implements Options {
     }
   }
 
+	@SuppressWarnings("unchecked")
   @Override
   public T withValue(String key, Object value) {
     OptionsBuilder<T> builder = toBuilder();
@@ -61,6 +62,7 @@ public abstract class AbstractOptions<T extends Options> implements Options {
    *
    * @return the options builder
    */
+	@SuppressWarnings("unchecked")
   public OptionsBuilder<T> toBuilder() {
     return toBuilder(optionsClass);
   }

@@ -152,6 +152,7 @@ class GeneralOptionsTest {
       Map<? extends Class<?>, List<Pair<String, Object>>> samplePairs = sampleValues.stream()
           .map(v -> {
             if (v instanceof Pair<?, ?> pair) {
+              //noinspection unchecked
               return (Pair<String, Object>) pair;
             } else {
               return Pair.of(v.toString(), v);

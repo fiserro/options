@@ -81,6 +81,7 @@ public class OptionsBuilder<T extends Options> {
         } else if (!(nestedValues instanceof Map<?, ?>)) {
           throw new IllegalArgumentException("The nested values for " + k + " must be a Map");
         }
+        //noinspection unchecked
         OptionsBuilder<Options> nestedBuilder = new OptionsBuilder<>((Class<Options>) v.classType(),
             (Map<String, Object>) nestedValues, args);
         values.put(k, nestedBuilder);

@@ -132,6 +132,7 @@ public class OptionsFactory {
           .getLoaded();
       Constructor<?> constructor = dynamicType.getDeclaredConstructor(Class.class, Map.class,
           Map.class);
+      //noinspection unchecked
       return (T) constructor.newInstance(optionsBuilder.optionsInterface(), optionsBuilder.values(),
           optionsBuilder.optionsByKey());
     }
@@ -169,6 +170,7 @@ public class OptionsFactory {
   @SneakyThrows
   public static <T extends Options> T clone(T options) {
     if (options instanceof AbstractOptions<?> subOptions) {
+      //noinspection unchecked
       OptionsBuilder<T> optionsBuilder = (OptionsBuilder<T>) subOptions.toBuilder();
       return buildOptions(optionsBuilder);
     }
