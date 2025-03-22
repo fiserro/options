@@ -1,5 +1,7 @@
 package io.github.fiserro.options.extension.validation.jakarta;
 
+import io.github.fiserro.options.OptionDef;
+import io.github.fiserro.options.Options;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Path;
 import jakarta.validation.metadata.ConstraintDescriptor;
@@ -10,29 +12,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ConstraintViolationImpl<T> implements ConstraintViolation<T> {
 
+  private final T rootBean;
   private final String message;
-  private final String propertyPath;
   private final Object invalidValue;
-
-  @Override
-  public Path getPropertyPath() {
-    return null; // TODO
-  }
-
+  private final OptionDef optionDef;
+  private final Options options;
 
   @Override
   public String getMessageTemplate() {
     return "";
   }
 
-  @Override
-  public T getRootBean() {
-    return null;
-  }
-
+  @SuppressWarnings("unchecked")
   @Override
   public Class<T> getRootBeanClass() {
-    return null;
+    return (Class<T>) rootBean.getClass();
   }
 
   @Override
@@ -47,6 +41,11 @@ public class ConstraintViolationImpl<T> implements ConstraintViolation<T> {
 
   @Override
   public Object getExecutableReturnValue() {
+    return null;
+  }
+
+  @Override
+  public Path getPropertyPath() {
     return null;
   }
 

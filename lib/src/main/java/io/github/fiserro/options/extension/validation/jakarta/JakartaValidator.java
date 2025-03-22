@@ -5,20 +5,24 @@ import io.github.fiserro.options.Options;
 import io.github.fiserro.options.OptionsBuilder;
 import io.github.fiserro.options.extension.validation.AbstractOptionsValidator;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.util.Collection;
+import java.lang.annotation.Annotation;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 /**
  * Extension that validates if all required options are set.
  */
+@Slf4j
 public class JakartaValidator extends AbstractOptionsValidator {
 
   public JakartaValidator(Class<? extends Options> declaringClass) {
@@ -40,36 +44,25 @@ public class JakartaValidator extends AbstractOptionsValidator {
 
     val value = getValue(options, option);
     return Stream.of(option.getAnnotations())
-        .map(a -> switch (a) {
-          case NotNull notNull -> notNull(option, value, notNull);
-          case Size size -> size(option, value, size);
-          default -> Optional.<ConstraintViolation<OptionDef>>empty();
-        })
+        .map(a -> validator(a).validate(option, value))
         .filter(Optional::isPresent)
         .map(Optional::get);
   }
 
-  private Optional<ConstraintViolation<OptionDef>> size(OptionDef option, @Nullable Object value,
-      Size size) {
-    int sizeValue = switch (value) {
-      case null -> 0;
-      case Collection<?> c -> c.size();
-      case Object[] a -> a.length;
-      case String s -> s.length();
-      default -> 0;
+  private AbstractJakartaAnnotationValidator<? extends Annotation> validator(
+      Annotation annotation) {
+    return switch (annotation) {
+      case NotNull notNull -> NotNullValidator.builder().annotation(notNull).build();
+      case Size size -> SizeValidator.builder().annotation(size).build();
+      case DecimalMax decimalMax -> DecimalMaxValidator.builder().annotation(decimalMax).build();
+      default -> new AbstractJakartaAnnotationValidator<>(annotation) {
+        @Override
+        public Optional<ConstraintViolation<OptionDef>> validate(OptionDef option, Object value) {
+          log.warn("Annotation {} is not supported", annotation.annotationType().getSimpleName());
+          return Optional.empty();
+        }
+      };
     };
-    if (size.min() > sizeValue || size.max() < sizeValue) {
-      return Optional.of(new ConstraintViolationImpl<>(size.message(), option.name(), value));
-    }
-    return Optional.empty();
-  }
-
-  private Optional<ConstraintViolation<OptionDef>> notNull(OptionDef option, Object value,
-      NotNull notNull) {
-    if (value != null) {
-      return Optional.empty();
-    }
-    return Optional.of(new ConstraintViolationImpl<>(notNull.message(), option.name(), value));
   }
 
   private Object getValue(OptionsBuilder<? extends Options> options, OptionDef option) {
@@ -79,6 +72,19 @@ public class JakartaValidator extends AbstractOptionsValidator {
       // getting a value may fail if some dependencies are not set. in this case we consider the option as not set
       return null;
     }
+  }
+
+  interface JakartaAnnotationValidator<A extends Annotation> {
+
+    Optional<ConstraintViolation<OptionDef>> validate(OptionDef option, Object value);
+  }
+
+  @SuperBuilder
+  @RequiredArgsConstructor
+  public abstract static class AbstractJakartaAnnotationValidator<A extends Annotation> implements
+      JakartaAnnotationValidator<A> {
+
+    protected final A annotation;
   }
 
 }

@@ -7,7 +7,7 @@ import io.github.fiserro.options.extension.validation.jakarta.JakartaValidator;
 import jakarta.validation.constraints.NotNull;
 
 @OptionsExtensions({JakartaValidator.class})
-public interface OptionsRequired extends Options {
+public interface OptionsNotNull extends Options {
 
   @NotNull
   @Option
