@@ -133,7 +133,7 @@ class GeneralOptionsTest {
     private OptionsTestHelper(Class<T> optionsClass) {
 
       optionsBuilder = OptionsFactory.newBuilder(optionsClass, new HashMap<>());
-      optionsByName = new OptionScanner().scanByName(optionsClass);
+      optionsByName = new OptionScanner().scanByName(optionsClass, OptionPath.empty());
     }
 
     Stream<Arguments> optionCases() {

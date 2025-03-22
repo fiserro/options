@@ -2,6 +2,7 @@ package io.github.fiserro.options;
 
 import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Preconditions;
 import java.lang.reflect.Method;
@@ -32,7 +33,7 @@ public class OptionScanner {
     return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name);
   }
 
-  private OptionDef optionDef(Method getter, Method wither) {
+  private OptionDef optionDef(Method getter, Method wither, OptionPath path) {
     Preconditions.checkState(getter.isAnnotationPresent(Option.class),
         Option.class.getSimpleName() + " must be present on getter method");
     Preconditions.checkState(getter.getParameterCount() == 0,
@@ -55,14 +56,15 @@ public class OptionScanner {
         .option(option)
         .method(getter)
         .wither(wither)
+        .path(path)
         .build();
   }
 
-  Set<OptionDef> scan(Class<?> clazz) {
-    return scan(clazz, new HashMap<>());
+  Set<OptionDef> scan(Class<?> clazz, OptionPath path) {
+    return scan(clazz, new HashMap<>(), path);
   }
 
-  private Set<OptionDef> scan(Class<?> clazz, Map<String, Method> withers) {
+  private Set<OptionDef> scan(Class<?> clazz, Map<String, Method> withers, OptionPath path) {
 
     if (!clazz.isInterface()) {
       throw new IllegalArgumentException("Options class must be an interface");
@@ -81,12 +83,12 @@ public class OptionScanner {
           }
           return m.isAnnotationPresent(Option.class);
         })
-        .map(m -> optionDef(m, withers.get(m.getName())))
+        .map(m -> optionDef(m, withers.get(m.getName()), path.add(m.getName())))
         .collect(Collectors.toMap(OptionDef::name, o -> o));
 
     Map<String, OptionDef> parentOptions = Stream.of(clazz.getInterfaces())
         .filter(Options.class::isAssignableFrom)
-        .flatMap(i -> scan(i, withers).stream())
+        .flatMap(i -> scan(i, withers, path).stream())
         .flatMap(o -> o.keys().stream().map(k -> Map.entry(k, o)))
         .filter(o -> !declaredOptions.containsKey(
             o.getKey())) // Handle parent/child name conflict by skipping - parent option has lower priority
@@ -109,14 +111,15 @@ public class OptionScanner {
         .collect(Collectors.toSet());
   }
 
-  Map<String, OptionDef> scanByKeys(Class<? extends Options> clazz) {
-    return scan(clazz).stream()
+  @VisibleForTesting
+  Map<String, OptionDef> scanByKeys(Class<? extends Options> clazz, OptionPath path) {
+    return scan(clazz, path).stream()
         .flatMap(o -> o.keys().stream().map(k -> Map.entry(k, o)))
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
-  public Map<String, OptionDef> scanByName(Class<? extends Options> clazz) {
-    return scan(clazz).stream()
+  public Map<String, OptionDef> scanByName(Class<? extends Options> clazz, OptionPath path) {
+    return scan(clazz, path).stream()
         .collect(Collectors.toMap(OptionDef::name, o -> o));
   }
 }

@@ -22,6 +22,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 class NestedCompositionTest {
 
   @Test
+  void pathOfNestedOptions() {
+    OptionsNestedComposition options = OptionsFactory.create(OptionsNestedComposition.class);
+    OptionsBuilder<Options> builder = options.toBuilder();
+    // TODO check nested options path
+  }
+
+  @Test
   void cloneNestedOptions() {
     OptionsNestedComposition options = OptionsFactory
         .create(OptionsNestedComposition.class, "--source.string=text",

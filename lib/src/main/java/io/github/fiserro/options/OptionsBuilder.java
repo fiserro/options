@@ -20,6 +20,7 @@ public class OptionsBuilder<T extends Options> {
   private final Class<T> optionsClass;
   private final Map<String, OptionDef> optionDefs;
   private final Map<String, Object> values;
+  private final OptionPath path;
   private final String[] args;
 
   private static final Set<String> RESERVED_METHOD_NAMES =
@@ -38,9 +39,17 @@ public class OptionsBuilder<T extends Options> {
   public static <T extends Options> OptionsBuilder<T> newBuilder(Class<T> optionsClass,
       Map<String, Object> values, String... args) {
     Map<String, Object> valuesCopy = deepCopyMap(values);
-    return new OptionsBuilder<>(optionsClass, valuesCopy, args);
+    return new OptionsBuilder<>(optionsClass, valuesCopy, OptionPath.empty(), args);
   }
 
+  /**
+   * Deep copies the map.
+   *
+   * @param map the map to copy
+   * @param <K> the type of the key
+   * @param <V> the type of the value
+   * @return the copied map
+   */
   @SuppressWarnings("unchecked")
   private static <K, V> Map<K, V> deepCopyMap(Map<K, V> map) {
     return map.entrySet().stream()
@@ -50,6 +59,12 @@ public class OptionsBuilder<T extends Options> {
         ));
   }
 
+  /**
+   * Deep copies the value.
+   *
+   * @param value the value to copy
+   * @return the copied value
+   */
   private static Object copyValue(Object value) {
     return switch (value) {
       case Options options -> options.toBuilder().values();
@@ -65,11 +80,13 @@ public class OptionsBuilder<T extends Options> {
    *
    * @param optionsClass the class of the options
    * @param values       the values of the options
+   * @param path         the path to the nested option
    * @param args         the program arguments
    */
-  private OptionsBuilder(Class<T> optionsClass, Map<String, Object> values, String... args) {
+  private OptionsBuilder(Class<T> optionsClass, Map<String, Object> values, OptionPath path,
+      String... args) {
     this.optionsClass = optionsClass;
-    this.optionDefs = new OptionScanner().scanByName(optionsClass);
+    this.optionDefs = new OptionScanner().scanByName(optionsClass, path);
     optionDefs.forEach((k, v) -> {
       if (RESERVED_METHOD_NAMES.contains(k)) {
         throw new IllegalArgumentException("The option name " + k + " is reserved");
@@ -82,11 +99,16 @@ public class OptionsBuilder<T extends Options> {
           throw new IllegalArgumentException("The nested values for " + k + " must be a Map");
         }
         //noinspection unchecked
-        OptionsBuilder<Options> nestedBuilder = new OptionsBuilder<>((Class<Options>) v.classType(),
-            (Map<String, Object>) nestedValues, args);
+        OptionsBuilder<Options> nestedBuilder = new OptionsBuilder<>(
+            (Class<Options>) v.classType(),
+            (Map<String, Object>) nestedValues,
+            path.add(k),
+            args
+        );
         values.put(k, nestedBuilder);
       }
     });
+    this.path = path;
     this.values = values;
     this.args = args;
   }
@@ -105,6 +127,13 @@ public class OptionsBuilder<T extends Options> {
     values.put(optionDef.name(), parse(optionDef, value));
   }
 
+  /**
+   * Sets the value of the nested option. The value must be of the same type as the option or
+   * String.
+   *
+   * @param value the value of the option
+   * @param path  the path to the nested option
+   */
   public void setValue(Object value, String... path) {
     OptionsBuilder<?> builder = this;
     for (int i = 0; i < path.length - 1; i++) {
