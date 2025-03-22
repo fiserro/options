@@ -6,16 +6,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.github.fiserro.options.OptionsFactory;
 import io.github.fiserro.options.extension.validation.ValidateOptionsException;
-import io.github.fiserro.options.test.OptionsNotNull;
+import io.github.fiserro.options.test.JakartaValidatedTestOptions;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class JakartaValidatorOptionsTest {
 
-  // TODO then NotNull
   @Test
   void exceptionIsThrownWhenRequiredOptionIsNotSet() {
+
+    Map<String, Object> values = Map.of(
+        "list", List.of()
+    );
+
     Exception exception = assertThrows(ValidateOptionsException.class,
-        () -> OptionsFactory.create(OptionsNotNull.class));
-    assertThat(exception.getMessage(), matchesPattern("(?s)3 options validation failed:.*"));
+        () -> OptionsFactory.create(JakartaValidatedTestOptions.class, values));
+    assertThat(exception.getMessage(), matchesPattern("(?s)4 options validation failed:.*"));
   }
 }
