@@ -1,10 +1,19 @@
 package io.github.fiserro.options;
 
+import java.util.Set;
+
 /**
  * Interface for the Options object. The Options object is a container for the options of the
  * application. It is used to set and get the values of the options.
  */
 public interface Options {
+
+  /**
+   * Returns the set of the option definitions.
+   *
+   * @return the set of the option definitions
+   */
+  Set<OptionDef> options();
 
   /**
    * Returns the value of the option by its key - name or alias.

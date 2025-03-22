@@ -30,34 +30,34 @@ public class JakartaValidator extends AbstractOptionsValidator {
   }
 
   @Override
-  protected Set<ConstraintViolation<OptionDef>> validate(
+  protected Set<ConstraintViolation<OptionsBuilder<?>>> validate(
       OptionsBuilder<? extends Options> options) {
-    return options.options().values().stream()
+    return options.options().stream()
         .distinct()
         .sorted(Comparator.comparing(OptionDef::name))
         .flatMap(option -> validate(options, option))
         .collect(Collectors.toSet());
   }
 
-  private Stream<ConstraintViolation<OptionDef>> validate(
+  private Stream<ConstraintViolation<OptionsBuilder<?>>> validate(
       OptionsBuilder<? extends Options> options, OptionDef option) {
 
     val value = getValue(options, option);
     return Stream.of(option.getAnnotations())
-        .map(a -> validator(a).validate(option, value))
+        .map(a -> validator(a).validate(options, option, value))
         .filter(Optional::isPresent)
         .map(Optional::get);
   }
 
-  private AbstractJakartaAnnotationValidator<? extends Annotation> validator(
-      Annotation annotation) {
+  private JakartaAnnotationValidator validator(Annotation annotation) {
     return switch (annotation) {
       case NotNull notNull -> NotNullValidator.builder().annotation(notNull).build();
       case Size size -> SizeValidator.builder().annotation(size).build();
       case DecimalMax decimalMax -> DecimalMaxValidator.builder().annotation(decimalMax).build();
       default -> new AbstractJakartaAnnotationValidator<>(annotation) {
         @Override
-        public Optional<ConstraintViolation<OptionDef>> validate(OptionDef option, Object value) {
+        public Optional<ConstraintViolation<OptionsBuilder<?>>> validate(
+            OptionsBuilder<? extends Options> options, OptionDef option, Object value) {
           log.warn("Annotation {} is not supported", annotation.annotationType().getSimpleName());
           return Optional.empty();
         }
@@ -74,15 +74,16 @@ public class JakartaValidator extends AbstractOptionsValidator {
     }
   }
 
-  interface JakartaAnnotationValidator<A extends Annotation> {
+  interface JakartaAnnotationValidator {
 
-    Optional<ConstraintViolation<OptionDef>> validate(OptionDef option, Object value);
+    Optional<ConstraintViolation<OptionsBuilder<?>>> validate(
+        OptionsBuilder<? extends Options> options, OptionDef option, Object value);
   }
 
   @SuperBuilder
   @RequiredArgsConstructor
   public abstract static class AbstractJakartaAnnotationValidator<A extends Annotation> implements
-      JakartaAnnotationValidator<A> {
+      JakartaAnnotationValidator {
 
     protected final A annotation;
   }

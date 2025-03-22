@@ -24,8 +24,11 @@ class NestedCompositionTest {
   @Test
   void pathOfNestedOptions() {
     OptionsNestedComposition options = OptionsFactory.create(OptionsNestedComposition.class);
-    OptionsBuilder<Options> builder = options.toBuilder();
-    // TODO check nested options path
+    options.options().forEach(l1 -> {
+      l1.children().forEach(l2 -> {
+        assertThat(l2.path(), is(OptionPath.of(l1.name()).add(l2.name())));
+      });
+    });
   }
 
   @Test

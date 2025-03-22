@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 class JakartaValidatorOptionsTest {
 
-
   // TODO then NotNull
   @Test
   void exceptionIsThrownWhenRequiredOptionIsNotSet() {

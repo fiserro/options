@@ -1,7 +1,9 @@
 package io.github.fiserro.options;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,11 @@ public abstract class AbstractOptions<T extends Options> implements Options {
   private final Map<String, OptionDef> options;
 
   @Override
+  public Set<OptionDef> options() {
+    return new HashSet<>(options.values());
+  }
+
+  @Override
   public Object getValue(String key) {
     OptionDef optionDef = options.get(key);
     if (optionDef == null) {
@@ -32,7 +39,7 @@ public abstract class AbstractOptions<T extends Options> implements Options {
     }
   }
 
-	@SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked")
   @Override
   public T withValue(String key, Object value) {
     OptionsBuilder<T> builder = toBuilder();
@@ -62,7 +69,7 @@ public abstract class AbstractOptions<T extends Options> implements Options {
    *
    * @return the options builder
    */
-	@SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked")
   public OptionsBuilder<T> toBuilder() {
     return toBuilder(optionsClass);
   }

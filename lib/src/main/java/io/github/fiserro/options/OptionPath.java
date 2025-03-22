@@ -8,13 +8,19 @@ import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
+@EqualsAndHashCode
 @RequiredArgsConstructor
 public class OptionPath implements Path {
 
   private final List<Node> nodes;
+
+  public static OptionPath of(String propertyName) {
+    return new OptionPath(List.of(new OptionNode(propertyName)));
+  }
 
   public static OptionPath empty() {
     return new OptionPath(List.of());

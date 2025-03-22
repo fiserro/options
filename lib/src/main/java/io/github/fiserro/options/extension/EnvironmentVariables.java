@@ -31,7 +31,7 @@ public class EnvironmentVariables extends OptionsExtensionSettingValues {
   }
 
   protected Map<String, String[]> getNestedKeys(OptionsBuilder<? extends Options> options) {
-    return options.options().values().stream()
+    return options.options().stream()
         .flatMap(o -> {
           if (o.isOptionsType()) {
             return getNestedKeys(

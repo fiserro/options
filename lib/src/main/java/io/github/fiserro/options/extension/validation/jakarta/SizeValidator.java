@@ -1,6 +1,8 @@
 package io.github.fiserro.options.extension.validation.jakarta;
 
 import io.github.fiserro.options.OptionDef;
+import io.github.fiserro.options.Options;
+import io.github.fiserro.options.OptionsBuilder;
 import io.github.fiserro.options.extension.validation.jakarta.JakartaValidator.AbstractJakartaAnnotationValidator;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.constraints.Size;
@@ -12,7 +14,8 @@ import lombok.experimental.SuperBuilder;
 public class SizeValidator extends AbstractJakartaAnnotationValidator<Size> {
 
   @Override
-  public Optional<ConstraintViolation<OptionDef>> validate(OptionDef option, Object value) {
+  public Optional<ConstraintViolation<OptionsBuilder<?>>> validate(
+      OptionsBuilder<? extends Options> options, OptionDef option, Object value) {
     int sizeValue = switch (value) {
       case null -> 0;
       case Collection<?> c -> c.size();
@@ -22,7 +25,7 @@ public class SizeValidator extends AbstractJakartaAnnotationValidator<Size> {
     };
     if (annotation.min() > sizeValue || annotation.max() < sizeValue) {
       return Optional.of(
-          new ConstraintViolationImpl<>(option, annotation.message(), value, option, null));
+          new ConstraintViolationImpl(annotation.message(), value, option, options));
     }
     return Optional.empty();
   }

@@ -15,7 +15,7 @@ class OptionScannerTest {
 
   @Test
   void scanOwnOptions() {
-    Map<String, OptionDef> options = scanner.scanByKeys(OptionsAll.class, OptionPath.empty());
+    Map<String, OptionDef> options = scanner.scanByKeys(OptionsAll.class);
     assertThat(options.size(), is(98));
     assertThat(options.get("DATE").description(), is("Date option"));
 //    assertThat(options.get("DATE").required(), is(false)); // TODO
@@ -24,8 +24,7 @@ class OptionScannerTest {
 
   @Test
   void scanChildOptions() {
-    Map<String, OptionDef> options = scanner.scanByName(OptionsDuplicates.class,
-        OptionPath.empty());
+    Map<String, OptionDef> options = scanner.scanByName(OptionsDuplicates.class);
     assertThat(options.size(), is(20));
     assertThat("Overridden option added default value",
         options.get("primitiveIntWithDefault").hasDefaultValue(), is(true));
@@ -37,7 +36,7 @@ class OptionScannerTest {
 
   @Test
   void witherMethodScanned() {
-    Map<String, OptionDef> options = scanner.scanByName(OptionsWith.class, OptionPath.empty());
+    Map<String, OptionDef> options = scanner.scanByName(OptionsWith.class);
     assertThat("Wither method scanned", options.get("string").hasWither(), is(true));
   }
 

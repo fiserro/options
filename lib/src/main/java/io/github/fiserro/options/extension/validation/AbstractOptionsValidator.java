@@ -1,6 +1,5 @@
 package io.github.fiserro.options.extension.validation;
 
-import io.github.fiserro.options.OptionDef;
 import io.github.fiserro.options.Options;
 import io.github.fiserro.options.OptionsBuilder;
 import io.github.fiserro.options.extension.AbstractOptionsExtension;
@@ -18,7 +17,7 @@ public abstract class AbstractOptionsValidator extends AbstractOptionsExtension 
     super(OptionExtensionType.VALIDATION, declaringClass);
   }
 
-  protected abstract Set<ConstraintViolation<OptionDef>> validate(
+  protected abstract Set<ConstraintViolation<OptionsBuilder<?>>> validate(
       OptionsBuilder<? extends Options> options);
 
   @Override

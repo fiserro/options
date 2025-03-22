@@ -12,7 +12,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -97,27 +96,29 @@ public class OptionsFactory {
         .subclass(AbstractOptions.class)
         .implement(optionsBuilder.optionsInterface());
 
-    for (Entry<String, OptionDef> entry : optionsBuilder.options().entrySet()) {
-      String key = entry.getKey();
-      OptionDef optionDef = entry.getValue();
-      if (optionsBuilder.getValue(key) == null && optionDef.hasDefaultMethod()) {
+//    builder = builder.method(named("options").and(takesNoArguments()))
+//        .intercept(MethodDelegation.to(GetValueInterceptor.class));
+
+    for (OptionDef optionDef : optionsBuilder.options()) {
+      String name = optionDef.name();
+      if (optionsBuilder.getValue(name) == null && optionDef.hasDefaultMethod()) {
         // do not intercept default methods when the value is not set
         continue;
       }
-      Object value = optionsBuilder.getValueOrPrimitiveDefault(key);
+      Object value = optionsBuilder.getValueOrPrimitiveDefault(name);
       if (optionDef.isOptionsType()) {
-        optionsBuilder.setValue(key, buildOptions((OptionsBuilder<?>) value));
-        value = optionsBuilder.getValueOrPrimitiveDefault(key);
+        optionsBuilder.setValue(name, buildOptions((OptionsBuilder<?>) value));
+        value = optionsBuilder.getValueOrPrimitiveDefault(name);
       }
-      if (value != null && !optionsBuilder.values().containsKey(key)) {
-        optionsBuilder.values().put(key, value);
+      if (value != null && !optionsBuilder.values().containsKey(name)) {
+        optionsBuilder.values().put(name, value);
       }
 
       Preconditions.checkState(
           value == null || optionDef.wrapperType().isAssignableFrom(value.getClass()),
-          "The value of the option %s is not of the expected type %s but it is %s", key,
+          "The value of the option %s is not of the expected type %s but it is %s", name,
           optionDef.javaType(), value == null ? null : value.getClass());
-      builder = builder.method(named(key).and(takesNoArguments()))
+      builder = builder.method(named(name).and(takesNoArguments()))
           .intercept(MethodDelegation.to(GetValueInterceptor.class));
 
       if (optionDef.hasWither()) {
@@ -137,6 +138,15 @@ public class OptionsFactory {
           optionsBuilder.optionsByKey());
     }
   }
+
+//  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+//  public static class GetOptionsInterceptor {
+//
+//    @RuntimeType
+//    public static Set<OptionDef> intercept(@This AbstractOptions<?> self, @Origin Method method) {
+//      return self.options();
+//    }
+//  }
 
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   public static class GetValueInterceptor {

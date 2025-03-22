@@ -21,7 +21,8 @@ public record OptionDef(
     @Delegate Method method,
     Method wither,
     Set<String> keys,
-    OptionPath path
+    OptionPath path,
+    Set<OptionDef> children
 ) {
 
   /**

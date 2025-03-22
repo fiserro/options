@@ -18,14 +18,9 @@ public class OptionsBuilder<T extends Options> {
 
   private static final String INVALID_KEY = "Invalid key: ";
   private final Class<T> optionsClass;
-  private final Map<String, OptionDef> optionDefs;
+  private final Set<OptionDef> optionDefs;
   private final Map<String, Object> values;
-  private final OptionPath path;
   private final String[] args;
-
-  private static final Set<String> RESERVED_METHOD_NAMES =
-      Set.of("equals", "hashCode", "toString", "getClass", "setValue", "getValue", "toBuilder",
-          "withValue");
 
   /**
    * Creates the options builder from the given Options Class, values and program arguments.
@@ -39,7 +34,8 @@ public class OptionsBuilder<T extends Options> {
   public static <T extends Options> OptionsBuilder<T> newBuilder(Class<T> optionsClass,
       Map<String, Object> values, String... args) {
     Map<String, Object> valuesCopy = deepCopyMap(values);
-    return new OptionsBuilder<>(optionsClass, valuesCopy, OptionPath.empty(), args);
+    Set<OptionDef> optionDefSet = new OptionScanner().scan(optionsClass);
+    return new OptionsBuilder<>(optionsClass, optionDefSet, valuesCopy, args);
   }
 
   /**
@@ -79,38 +75,38 @@ public class OptionsBuilder<T extends Options> {
    * Creates the options builder from the given Options Class, values and program arguments.
    *
    * @param optionsClass the class of the options
+   * @param optionDefs   the options definition
    * @param values       the values of the options
-   * @param path         the path to the nested option
    * @param args         the program arguments
    */
-  private OptionsBuilder(Class<T> optionsClass, Map<String, Object> values, OptionPath path,
-      String... args) {
+  private OptionsBuilder(Class<T> optionsClass, Set<OptionDef> optionDefs,
+      Map<String, Object> values, String... args) {
     this.optionsClass = optionsClass;
-    this.optionDefs = new OptionScanner().scanByName(optionsClass, path);
-    optionDefs.forEach((k, v) -> {
-      if (RESERVED_METHOD_NAMES.contains(k)) {
-        throw new IllegalArgumentException("The option name " + k + " is reserved");
-      }
-      if (v.isOptionsType()) {
-        Object nestedValues = values.remove(k);
-        if (nestedValues == null) {
-          nestedValues = new HashMap<>();
-        } else if (!(nestedValues instanceof Map<?, ?>)) {
-          throw new IllegalArgumentException("The nested values for " + k + " must be a Map");
-        }
-        //noinspection unchecked
-        OptionsBuilder<Options> nestedBuilder = new OptionsBuilder<>(
-            (Class<Options>) v.classType(),
-            (Map<String, Object>) nestedValues,
-            path.add(k),
-            args
-        );
-        values.put(k, nestedBuilder);
-      }
-    });
-    this.path = path;
+    this.optionDefs = optionDefs;
     this.values = values;
     this.args = args;
+
+    optionDefs.forEach(v -> {
+      if (v.isOptionsType()) {
+        Object nestedValues = values.remove(v.name());
+        if (nestedValues == null) {
+          nestedValues = new HashMap<>();
+        }
+        if (nestedValues instanceof Map<?, ?> map) {
+          //noinspection unchecked
+          OptionsBuilder<Options> nestedBuilder = new OptionsBuilder<>(
+              (Class<Options>) v.classType(),
+              v.children(),
+              (Map<String, Object>) map,
+              args
+          );
+          values.put(v.name(), nestedBuilder);
+        } else {
+          throw new IllegalArgumentException(
+              "The nested values for '" + v.path() + "' must be a Map");
+        }
+      }
+    });
   }
 
   /**
@@ -217,12 +213,22 @@ public class OptionsBuilder<T extends Options> {
   }
 
   /**
+   * Returns the options definition.
+   *
+   * @return the options definition
+   */
+  public Set<OptionDef> options() {
+    return optionDefs;
+  }
+
+  /**
    * Returns the options definition collected in Map by its name.
    *
    * @return the options definition
    */
-  public Map<String, OptionDef> options() {
-    return optionDefs;
+  public Map<String, OptionDef> optionsByName() {
+    return optionDefs.stream()
+        .collect(Collectors.toMap(OptionDef::name, o -> o));
   }
 
   /**
@@ -231,7 +237,7 @@ public class OptionsBuilder<T extends Options> {
    * @return the options definition
    */
   public Map<String, OptionDef> optionsByKey() {
-    return optionDefs.values().stream()
+    return optionDefs.stream()
         .flatMap(o -> o.keys().stream().map(k -> Map.entry(k, o)))
         .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
   }

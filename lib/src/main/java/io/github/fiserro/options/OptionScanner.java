@@ -21,6 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OptionScanner {
 
+  private static final Set<String> RESERVED_METHOD_NAMES =
+      Set.of("equals", "hashCode", "toString", "getClass", "setValue", "getValue", "toBuilder",
+          "withValue");
+
   private void loadWithers(Class<?> clazz, Map<String, Method> withers) {
     Stream.of(clazz.getDeclaredMethods())
         .filter(m -> m.getName().startsWith("with"))
@@ -31,6 +35,10 @@ public class OptionScanner {
   public static String nameOfWither(Method wither) {
     String name = wither.getName().substring(4);
     return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name);
+  }
+
+  Set<OptionDef> scan(Class<?> clazz) {
+    return scan(clazz, new HashMap<>(), OptionPath.empty());
   }
 
   private OptionDef optionDef(Method getter, Method wither, OptionPath path) {
@@ -51,17 +59,25 @@ public class OptionScanner {
           "Wither method: %s parameter type: %s must be assignable to Options",
           wither.getName(), wither.getParameterTypes()[0]);
     }
+    if (RESERVED_METHOD_NAMES.contains(getter.getName())) {
+      throw new IllegalArgumentException("The option name " + getter.getName() + " is reserved");
+    }
+
+    Set<OptionDef> children;
+    if (Options.class.isAssignableFrom(getter.getReturnType())) {
+      children = scan(getter.getReturnType(), new HashMap<>(), path);
+    } else {
+      children = Set.of();
+    }
+
     Option option = getter.getAnnotation(Option.class);
     return OptionDef.builder()
         .option(option)
         .method(getter)
         .wither(wither)
         .path(path)
+        .children(children)
         .build();
-  }
-
-  Set<OptionDef> scan(Class<?> clazz, OptionPath path) {
-    return scan(clazz, new HashMap<>(), path);
   }
 
   private Set<OptionDef> scan(Class<?> clazz, Map<String, Method> withers, OptionPath path) {
@@ -90,8 +106,8 @@ public class OptionScanner {
         .filter(Options.class::isAssignableFrom)
         .flatMap(i -> scan(i, withers, path).stream())
         .flatMap(o -> o.keys().stream().map(k -> Map.entry(k, o)))
-        .filter(o -> !declaredOptions.containsKey(
-            o.getKey())) // Handle parent/child name conflict by skipping - parent option has lower priority
+        // Handle parent/child name conflict by skipping - parent option has lower priority
+        .filter(o -> !declaredOptions.containsKey(o.getKey()))
         .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (a, b) -> {
           // Handle name conflict from same level of parent interfaces
           // Options with the same name must be strongly equal and their keys(aliases) are merged
@@ -112,14 +128,14 @@ public class OptionScanner {
   }
 
   @VisibleForTesting
-  Map<String, OptionDef> scanByKeys(Class<? extends Options> clazz, OptionPath path) {
-    return scan(clazz, path).stream()
+  Map<String, OptionDef> scanByKeys(Class<? extends Options> clazz) {
+    return scan(clazz).stream()
         .flatMap(o -> o.keys().stream().map(k -> Map.entry(k, o)))
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
-  public Map<String, OptionDef> scanByName(Class<? extends Options> clazz, OptionPath path) {
-    return scan(clazz, path).stream()
+  public Map<String, OptionDef> scanByName(Class<? extends Options> clazz) {
+    return scan(clazz).stream()
         .collect(Collectors.toMap(OptionDef::name, o -> o));
   }
 }
