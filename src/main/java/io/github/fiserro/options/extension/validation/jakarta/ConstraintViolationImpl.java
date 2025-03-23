@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.validator.internal.metadata.descriptor.ConstraintDescriptorImpl;
 
 @Getter
@@ -118,5 +119,10 @@ public class ConstraintViolationImpl implements ConstraintViolation<OptionsBuild
   @Override
   public <U> U unwrap(Class<U> aClass) {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public String toString() {
+    return message;
   }
 }

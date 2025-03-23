@@ -4,6 +4,7 @@ import io.github.fiserro.options.Options;
 import io.github.fiserro.options.OptionsBuilder;
 import io.github.fiserro.options.OptionsException;
 import jakarta.validation.ConstraintViolation;
+import java.util.Comparator;
 import java.util.Set;
 import lombok.Getter;
 
@@ -23,9 +24,10 @@ public class ValidateOptionsException extends OptionsException {
 
   private static String getMessage(Set<ConstraintViolation<OptionsBuilder<?>>> validation) {
     int size = validation.size();
-    return size + " options validation failed: " + validation.stream()
+    return size + " options validation failed:\n" + validation.stream()
+        .sorted(Comparator.comparing(ConstraintViolation::getMessage))
         .map(ConstraintViolation::getMessage)
-        .reduce((a, b) -> a + ", " + b)
+        .reduce((a, b) -> a + "\n" + b)
         .orElse("");
   }
 }

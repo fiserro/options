@@ -256,6 +256,6 @@ public record OptionDef(
 
   @Override
   public String toString() {
-    return method.getName() + " (" + javaType().getTypeName() + ")";
+    return javaType().getTypeName() + " " + path();
   }
 }
