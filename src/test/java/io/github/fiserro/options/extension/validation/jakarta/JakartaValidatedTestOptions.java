@@ -1,20 +1,25 @@
-package io.github.fiserro.options.test;
+package io.github.fiserro.options.extension.validation.jakarta;
 
 import io.github.fiserro.options.Option;
-import io.github.fiserro.options.extension.validation.jakarta.JakartaValidatedOptions;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public interface JakartaValidatedTestOptions extends JakartaValidatedOptions {
 
-  @NotNull
+  @Size(min = 5, max = 10)
   @Option
   String string();
 
-  @NotNull
+  @DecimalMax("10")
   @Option
-  Integer integer();
+  Integer max10();
+
+  @DecimalMin("10")
+  @Option
+  Integer min10();
 
   @NotNull
   @Option

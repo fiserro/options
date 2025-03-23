@@ -96,9 +96,6 @@ public class OptionsFactory {
         .subclass(AbstractOptions.class)
         .implement(optionsBuilder.optionsInterface());
 
-//    builder = builder.method(named("options").and(takesNoArguments()))
-//        .intercept(MethodDelegation.to(GetValueInterceptor.class));
-
     for (OptionDef optionDef : optionsBuilder.options()) {
       String name = optionDef.name();
       if (optionsBuilder.getValue(name) == null && optionDef.hasDefaultMethod()) {

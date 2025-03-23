@@ -22,6 +22,14 @@ public class OptionPath implements Path {
     return new OptionPath(List.of(new OptionNode(propertyName)));
   }
 
+  public static OptionPath of(String... propertyNames) {
+    OptionPath path = empty();
+    for (String propertyName : propertyNames) {
+      path = path.add(propertyName);
+    }
+    return path;
+  }
+
   public static OptionPath empty() {
     return new OptionPath(List.of());
   }
