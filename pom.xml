@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.github.fiserro</groupId>
+  <artifactId>options</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <commons-lang3.version>3.17.0</commons-lang3.version>
+    <guava.version>33.4.0-jre</guava.version>
+    <slf4j-api.version>2.0.17</slf4j-api.version>
+    <logback-classic.version>1.5.18</logback-classic.version>
+    <byte-buddy.version>1.17.2</byte-buddy.version>
+    <lombok.version>1.18.36</lombok.version>
+    <hamcrest.version>3.0</hamcrest.version>
+    <dateparser.version>1.0.11</dateparser.version>
+    <jakarta-validation-api.version>3.1.1</jakarta-validation-api.version>
+    <jakarta-el-api.version>6.0.1</jakarta-el-api.version>
+    <expressly.version>6.0.0-M1</expressly.version>
+    <jupiter.version>5.13.0-M1</jupiter.version>
+    <hibernate-validator.version>8.0.2.Final</hibernate-validator.version>
+
+  </properties>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>${hibernate-validator.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons-lang3.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${logback-classic.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
+      <version>${byte-buddy.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <version>${hamcrest.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.sisyphsu</groupId>
+      <artifactId>dateparser</artifactId>
+      <version>${dateparser.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <version>${jakarta-validation-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.el</groupId>
+      <artifactId>jakarta.el-api</artifactId>
+      <version>${jakarta-el-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.expressly</groupId>
+      <artifactId>expressly</artifactId>
+      <version>${expressly.version}</version>
+    </dependency>
+
+  </dependencies>
+
+</project>
