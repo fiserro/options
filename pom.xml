@@ -31,7 +31,8 @@
   <scm>
     <url>https://github.com/fiserro/options</url>
     <connection>scm:git:https://github.com/fiserro/options.git</connection>
-    <developerConnection>scm:git:ssh://github.com:fiserro/options.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:fiserro/options.git</developerConnection>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
