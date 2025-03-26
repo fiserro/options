@@ -245,7 +245,6 @@ public static void main(String[] args) {
 ## Installation
 
 Add the dependency to your Maven project:
-Unfortunately, the library is not yet available in Maven Central Repository.
 
 ```xml
 <dependency>
