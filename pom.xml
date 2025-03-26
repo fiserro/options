@@ -6,7 +6,31 @@
 
   <groupId>io.github.fiserro</groupId>
   <artifactId>options</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Application Options Library</name>
+  <description>A type-safe configuration library for Java that supports validation using Jakarta Bean Validation.</description>
+  <url>https://github.com/fiserro/options</url>
+
+  <licenses>
+    <license>
+      <name>Apache License 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>https://github.com/fiserro</id>
+      <name>Robert Fiser</name>
+      <email>rfiser46@gmail.com</email>
+    </developer>
+  </developers>
+
+  <scm>
+    <url>https://github.com/fiserro/options</url>
+    <connection>scm:git:https://github.com/fiserro/options.git</connection>
+    <developerConnection>scm:git:ssh://github.com:fiserro/options.git</developerConnection>
+  </scm>
 
   <properties>
     <maven.compiler.source>21</maven.compiler.source>

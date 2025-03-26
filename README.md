@@ -35,7 +35,7 @@ Define your configuration interface:
 ```java
 import io.github.fiserro.options.Option;
 
-@OptionsExtensions({EnvironmentVariables.class})
+@OptionsExtensions({EnvironmentVariables.class, ArgumentsEquals.class})
 public interface MyConfig extends Options {
 
   // default primitive value: false
@@ -72,8 +72,16 @@ MyConfig config = OptionsFactory.create(MyConfig.class);
 ```
 
 
-Create configuration instance from HashMap:
+Create configuration instance from command line arguments:
+Expected command line arguments: `--enabled=true`, `--threadCount=50`, `--serviceUrl=http://example.com`
+To be able to load configuration from command line arguments, you need to add `ArgumentsEquals` or `ArgumentsSpace` class extension to the `@OptionsExtensions` annotation.
+```java
+public static void main(String[] args) {
+    MyConfig config = OptionsFactory.create(MyConfig.class, args);
+}
+```
 
+For testing purposes or when you need to load configuration programmatically, you can create configuration instance from HashMap:
 ```java
 MyConfig config = OptionsFactory.create(MyConfig.class, Map.of(
     "enabled", true,
@@ -83,14 +91,6 @@ MyConfig config = OptionsFactory.create(MyConfig.class, Map.of(
 ```
 
 
-Create configuration instance from command line arguments:
-Expected command line arguments: `--enabled=true`, `--threadCount=50`, `--serviceUrl=http://example.com`
-
-```java
-public static void main(String[] args) {
-    MyConfig config = OptionsFactory.create(MyConfig.class, args);
-}
-```
 
 ### Supported Jakarta Validations
 
@@ -251,7 +251,7 @@ Unfortunately, the library is not yet available in Maven Central Repository.
 <dependency>
     <groupId>io.github.fiserro</groupId>
     <artifactId>options</artifactId>
-    <version>[VERSION]</version>
+    <version>0.0.1</version>
 </dependency>
 ```
 
