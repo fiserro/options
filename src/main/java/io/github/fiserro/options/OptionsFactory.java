@@ -106,25 +106,24 @@ public class OptionsFactory {
         .implement(optionsBuilder.optionsInterface());
 
     for (OptionDef optionDef : optionsBuilder.options()) {
-      String name = optionDef.name();
-      if (optionsBuilder.getValue(name) == null && optionDef.hasDefaultMethod()) {
+      if (optionsBuilder.getValue(optionDef) == null && optionDef.hasDefaultMethod()) {
         // do not intercept default methods when the value is not set
         continue;
       }
-      Object value = optionsBuilder.getValueOrPrimitiveDefault(name);
+      Object value = optionsBuilder.getValueOrPrimitiveDefault(optionDef);
       if (optionDef.isOptionsType()) {
-        optionsBuilder.setValue(name, buildOptions((OptionsBuilder<?, ?>) value));
-        value = optionsBuilder.getValueOrPrimitiveDefault(name);
+        optionsBuilder.setValue(optionDef, buildOptions((OptionsBuilder<?, ?>) value));
+        value = optionsBuilder.getValueOrPrimitiveDefault(optionDef);
       }
-      if (value != null && !optionsBuilder.values().containsKey(name)) {
-        optionsBuilder.values().put(name, value);
+      if (value != null && !optionsBuilder.values().containsKey(optionDef)) {
+        optionsBuilder.setValue(optionDef, value);
       }
 
       Preconditions.checkState(
           value == null || optionDef.wrapperType().isAssignableFrom(value.getClass()),
-          "The value of the option %s is not of the expected type %s but it is %s", name,
+          "The value of the option %s is not of the expected type %s but it is %s", optionDef.name(),
           optionDef.javaType(), value == null ? null : value.getClass());
-      builder = builder.method(named(name).and(takesNoArguments()))
+      builder = builder.method(named(optionDef.name()).and(takesNoArguments()))
           .intercept(MethodDelegation.to(GetValueInterceptor.class));
 
       if (optionDef.hasWither()) {
@@ -178,7 +177,6 @@ public class OptionsFactory {
   public static <T extends Options<T>, B extends OptionsBuilder<T, B>> T clone(T options) {
     return options.toBuilder().build();
   }
-
   /**
    * Validates the options.
    *
@@ -187,10 +185,30 @@ public class OptionsFactory {
   public static <T extends Options<T>, B extends OptionsBuilder<T, B>> Set<ConstraintViolation<T>> validate(
       Options<T> options) {
     OptionsBuilder<T, B> builder = options.toBuilder();
+    return validate(builder);
+  }
+
+
+  /**
+   * Validates the options.
+   *
+   * @param builder the options builder to be validated
+   */
+  private static <T extends Options<T>, B extends OptionsBuilder<T, B>> Set<ConstraintViolation<T>> validate(
+      OptionsBuilder<T, B> builder) {
+
+//    List<? extends ConstraintViolation<?>> list = builder.values()
+//        .filter(OptionDef::isOptionsType)
+//        .map(options::getValue)
+//        .map(v -> (Options<?>) v)
+//        .flatMap(subOptions -> {
+//          return validate(subOptions).stream();
+//        })
+//        .toList();
+
     NavigableMap<OptionExtensionType, List<OptionsExtension>> extensions = new OptionExtensionScanner().scan(
         builder.optionsInterface());
-    return extensions.getOrDefault(
-            OptionExtensionType.VALIDATION, List.of())
+    return extensions.getOrDefault(OptionExtensionType.VALIDATION, List.of())
         .stream()
         .map(e -> (AbstractOptionsValidator<T, B>) e)
         .flatMap(e -> e.validate(builder, options).stream())

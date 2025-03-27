@@ -6,7 +6,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 import io.github.fiserro.options.extension.Envio;
-import io.github.fiserro.options.test.OptionsNestedComposition;
+import io.github.fiserro.options.test.NestedCompositionOptions;
 import io.github.fiserro.options.test.Strings;
 import java.util.Arrays;
 import java.util.Map;
@@ -23,7 +23,7 @@ class NestedCompositionTest {
 
   @Test
   void pathOfNestedOptions() {
-    OptionsNestedComposition options = OptionsFactory.create(OptionsNestedComposition.class);
+    NestedCompositionOptions options = OptionsFactory.create(NestedCompositionOptions.class);
     options.options().forEach(l1 -> {
       l1.children().forEach(l2 -> {
         assertThat(l2.path(), is(OptionPath.of(l1.name()).add(l2.name())));
@@ -33,8 +33,8 @@ class NestedCompositionTest {
 
   @Test
   void cloneNestedOptions() {
-    OptionsNestedComposition options = OptionsFactory
-        .create(OptionsNestedComposition.class, "--source.string=text",
+    NestedCompositionOptions options = OptionsFactory
+        .create(NestedCompositionOptions.class, "--source.string=text",
             "--target.listOfString=x,y,z");
 
     options = options.toBuilder()
@@ -51,7 +51,7 @@ class NestedCompositionTest {
     Envio.setVar("UNIT_NAME", "unit1");
     Envio.setVar("SOURCE__STRING", "source input");
     Envio.setVar("TARGET__LIST_OF_STRING", "x,y,z");
-    OptionsNestedComposition options = OptionsFactory.create(OptionsNestedComposition.class);
+    NestedCompositionOptions options = OptionsFactory.create(NestedCompositionOptions.class);
     Envio.clear();
 
     Strings source = options.source();
@@ -73,7 +73,7 @@ class NestedCompositionTest {
 
   @ParameterizedTest
   @MethodSource("arguments")
-  void createNestedFromDifferentSources(OptionsNestedComposition options) {
+  void createNestedFromDifferentSources(NestedCompositionOptions options) {
 
     Strings source = options.source();
     assertThat(source.string(), is("text"));
@@ -97,14 +97,14 @@ class NestedCompositionTest {
         "source", Map.of("string", "text"),
         "target", Map.of("listOfString", Arrays.asList("x", "y", "z"))
     );
-    var o1 = OptionsFactory.create(OptionsNestedComposition.class, values);
+    var o1 = OptionsFactory.create(NestedCompositionOptions.class, values);
 
-    var o2 = OptionsFactory.create(OptionsNestedComposition.class, "--source.string=text",
+    var o2 = OptionsFactory.create(NestedCompositionOptions.class, "--source.string=text",
         "--target.listOfString=x,y,z");
 
     Envio.setVar("SOURCE__STRING", "text");
     Envio.setVar("TARGET__LIST_OF_STRING", "x,y,z");
-    var o3 = OptionsFactory.create(OptionsNestedComposition.class);
+    var o3 = OptionsFactory.create(NestedCompositionOptions.class);
     Envio.clear();
 
     return Stream.of(o1, o2, o3)

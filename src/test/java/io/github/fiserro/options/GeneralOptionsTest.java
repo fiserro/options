@@ -78,7 +78,7 @@ class GeneralOptionsTest {
             + option.javaType() + ":" + option.name(),
         expectedValue, is(notNullValue()));
 
-    Map<String, Object> values = optionsBuilder.values();
+    Map<OptionDef, Object> values = optionsBuilder.values();
     optionsBuilder.resetValue(option.name());
 
     Options options = optionsBuilder.build();
@@ -97,12 +97,12 @@ class GeneralOptionsTest {
 
     options = options.withValue(option.name(), expectedValue);
 
-    assertThat("After setting value, it's possible to read it", options.getValue(option.name()),
+    assertThat("After setting value, it's possible to read it", options.getValue(option),
         is(expectedValue));
     assertThat("After setting value, it's possible to read it", option.invokeMethod(options),
         is(expectedValue));
     assertThat("After setting value, source map contains it",
-        options.toBuilder(optionsBuilder.optionsInterface()).values().get(option.name()),
+        options.toBuilder(optionsBuilder.optionsInterface()).values().get(option),
         is(expectedValue));
 
     optionsBuilder.resetValue(option.name());
@@ -114,7 +114,7 @@ class GeneralOptionsTest {
     assertThat("After setting a string representation of value, it's possible to read it",
         option.invokeMethod(options), is(expectedValue));
     assertThat("After setting a string representation of value, source map contains it",
-        values.get(option.name()), is(expectedValue));
+        values.get(option), is(expectedValue));
   }
 
   Stream<Arguments> optionCases() {

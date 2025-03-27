@@ -7,15 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.github.fiserro.options.Options;
-import io.github.fiserro.options.extension.ArgumentsEquals;
-import io.github.fiserro.options.extension.ArgumentsSpace;
-import io.github.fiserro.options.extension.EnvironmentVariables;
-import io.github.fiserro.options.extension.OptionExtensionScanner;
 import io.github.fiserro.options.extension.OptionExtensionScanner.IllegalExtensionException;
-import io.github.fiserro.options.extension.OptionExtensionType;
-import io.github.fiserro.options.extension.OptionsExtension;
-import io.github.fiserro.options.extension.OptionsExtensions;
-import io.github.fiserro.options.test.OptionsOverridingExtension;
+import io.github.fiserro.options.test.OverridingExtensionOptions;
 import java.util.List;
 import java.util.NavigableMap;
 import org.hamcrest.MatcherAssert;
@@ -35,7 +28,7 @@ class OptionExtensionScannerTest {
   @Test
   void scanExtensionsOverride() {
     NavigableMap<OptionExtensionType, List<OptionsExtension>> extensions = scanner.scan(
-        OptionsOverridingExtension.class);
+        OverridingExtensionOptions.class);
     MatcherAssert.assertThat(extensions.get(LOAD_FROM_ARGS).size(), is(1));
     MatcherAssert.assertThat(extensions.get(LOAD_FROM_ARGS).getFirst(),
         instanceOf(ArgumentsSpace.class));

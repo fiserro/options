@@ -25,6 +25,14 @@ public interface Options<T extends Options<T>> {
   Object getValue(String key);
 
   /**
+   * Returns the value of the option by its key - name or alias.
+   *
+   * @param optionDef the option definition
+   * @return the value of the option or null if the option is not set and has no default value
+   */
+  Object getValue(OptionDef optionDef);
+
+  /**
    * Creates a new instance of the {@link OptionsBuilder} for the given options class. If you need
    * to modify some option you have to do it in the builder because the options are immutable. By
    * this you can create a different type of options with the same values.
@@ -44,6 +52,8 @@ public interface Options<T extends Options<T>> {
    */
   <B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> toBuilder();
 
+
+  // TODO OptionDef key variant
   /**
    * Returns new instance of the options with changed value of the option.
    *

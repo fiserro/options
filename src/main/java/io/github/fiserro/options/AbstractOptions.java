@@ -19,7 +19,7 @@ import org.apache.commons.lang3.tuple.Pair;
 public abstract class AbstractOptions<T extends AbstractOptions<T>> implements Options<T> {
 
   private final Class<T> optionsClass;
-  private final Map<String, Object> values;
+  private final Map<OptionDef, Object> values;
   private final Map<String, OptionDef> options;
 
   @Override
@@ -32,6 +32,14 @@ public abstract class AbstractOptions<T extends AbstractOptions<T>> implements O
     OptionDef optionDef = options.get(key);
     if (optionDef == null) {
       throw new IllegalArgumentException("Invalid key: " + key);
+    }
+    return getValue(optionDef);
+  }
+
+  @Override
+  public Object getValue(OptionDef optionDef) {
+    if (optionDef == null) {
+      throw new IllegalArgumentException("OptionDef cannot be null");
     }
     try {
       return optionDef.method().invoke(this);

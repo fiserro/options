@@ -6,6 +6,7 @@ import static org.hamcrest.core.Is.is;
 import io.github.fiserro.options.OptionPath;
 import io.github.fiserro.options.Options;
 import io.github.fiserro.options.OptionsFactory;
+import io.github.fiserro.options.test.NestedCompositionOptions;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Path;
 import jakarta.validation.constraints.DecimalMax;
@@ -47,6 +48,14 @@ class JakartaValidatorOptionsTest {
                 Pair.of(OptionPath.of("max10"), DecimalMax.class),
                 Pair.of(OptionPath.of("bool"), NotNull.class)
             )
+        ),
+        Arguments.of(
+            NestedCompositionOptions.class,
+            Map.of(),
+            Set.of(
+                Pair.of(OptionPath.of("source"), NotNull.class),
+                Pair.of(OptionPath.of("target"), NotNull.class)
+            )
         )
     );
   }
@@ -82,4 +91,5 @@ class JakartaValidatorOptionsTest {
     assertThat(violation.getRootBeanClass(), is(JakartaValidatedTestOptions.class));
     assertThat(violation.getMessage(), Is.is("@NotNull java.lang.Boolean bool = null - @jakarta.validation.constraints.NotNull(message=\"{jakarta.validation.constraints.NotNull.message}\", payload={}, groups={})"));
   }
+
 }

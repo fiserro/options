@@ -20,7 +20,7 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
   private static final String INVALID_KEY = "Invalid key: ";
   private final Class<T> optionsClass;
   private final Set<OptionDef> optionDefs;
-  private final Map<String, Object> values;
+  private final Map<OptionDef, Object> values;
   private final String[] args;
 
   /**
@@ -28,7 +28,22 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
    *
    * @param optionsClass the class of the options
    * @param values       the values of the options
-   * @param args         the program arguments
+   * @param <T>          the type of the options
+   * @param <B>          the type of the builder
+   * @return the options builder
+   */
+  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
+      Class<T> optionsClass, Map<OptionDef, Object> values) {
+    Map<OptionDef, Object> valuesCopy = deepCopyMap(values);
+    Set<OptionDef> optionDefSet = new OptionScanner().scan(optionsClass);
+    return new OptionsBuilder<>(optionsClass, optionDefSet, valuesCopy);
+  }
+
+  /**
+   * Creates the options builder from the given Options Class, values and program arguments.
+   *
+   * @param optionsClass the class of the options
+   * @param values       the values of the options
    * @param <T>          the type of the options
    * @param <B>          the type of the builder
    * @return the options builder
@@ -79,28 +94,44 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
    * @param optionsClass the class of the options
    * @param optionDefs   the options definition
    * @param values       the values of the options
+   */
+  private OptionsBuilder(Class<T> optionsClass, Set<OptionDef> optionDefs,
+      Map<OptionDef, Object> values) {
+    this.optionsClass = optionsClass;
+    this.optionDefs = optionDefs;
+    this.values = values;
+    this.args = new String[0];
+  }
+
+  /**
+   * Creates the options builder from the given Options Class, values and program arguments.
+   *
+   * @param optionsClass the class of the options
+   * @param optionDefs   the options definition
+   * @param values       the values of the options
    * @param args         the program arguments
    */
   private OptionsBuilder(Class<T> optionsClass, Set<OptionDef> optionDefs,
       Map<String, Object> values, String... args) {
     this.optionsClass = optionsClass;
     this.optionDefs = optionDefs;
-    this.values = values;
+    this.values = new HashMap<>();
     this.args = args;
 
     optionDefs.forEach(v -> {
       if (v.isOptionsType()) {
-        Object nestedValues = values.remove(v.name());
+        Object nestedValues = values.get(v.name());
         if (nestedValues == null) {
           nestedValues = new HashMap<>();
         }
         if (nestedValues instanceof Map<?, ?> map) {
-
-          values.put(v.name(), new OptionsBuilder(v.classType(), v.children(), map, args));
+          this.values.put(v, new OptionsBuilder(v.classType(), v.children(), map, args));
         } else {
           throw new IllegalArgumentException(
               "The nested values for '" + v.path() + "' must be a Map");
         }
+      } else {
+        this.values.put(v, values.get(v.name()));
       }
     });
   }
@@ -116,7 +147,20 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
     if (optionDef == null) {
       throw new IllegalArgumentException("No such option for key: " + key);
     }
-    values.put(optionDef.name(), parse(optionDef, value));
+    setValue(optionDef, value);
+  }
+
+  /**
+   * Sets the value of the option. The value must be of the same type as the option or String.
+   *
+   * @param optionDef the option definition
+   * @param value     the value of the option
+   */
+  public void setValue(OptionDef optionDef, Object value) {
+    if (optionDef == null) {
+      throw new IllegalArgumentException("OptionDef cannot be null");
+    }
+    values.put(optionDef, parse(optionDef, value));
   }
 
   /**
@@ -177,7 +221,22 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
     if (optionDef == null) {
       throw new IllegalArgumentException(INVALID_KEY + key);
     }
-    Object value = values.get(optionDef.name());
+    return getValueOrPrimitiveDefault(optionDef);
+  }
+
+  /**
+   * Returns the value of the option by its definition. The key is the java name of the option, the
+   * default environment variable name or any of the environment name aliases.
+   * <p>If method has primitive return type, it returns default value of the primitive type.
+   *
+   * @param optionDef the option definition
+   * @return the value of the option, primitive default or null
+   */
+  public Object getValueOrPrimitiveDefault(OptionDef optionDef) {
+    if (optionDef == null) {
+      throw new IllegalArgumentException("OptionDef cannot be null");
+    }
+    Object value = values.get(optionDef);
     if (value == null && optionDef.isPrimitive()) {
       value = optionDef.getDefaultPrimitiveValue();
     }
@@ -196,7 +255,20 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
     if (optionDef == null) {
       throw new IllegalArgumentException(INVALID_KEY + key);
     }
-    return values.get(optionDef.name());
+    return getValue(optionDef);
+  }
+
+  /**
+   * Returns the value of the option by its definition.
+   *
+   * @param optionDef the option definition
+   * @return the value of the option or null
+   */
+  public Object getValue(OptionDef optionDef) {
+    if (optionDef == null) {
+      throw new IllegalArgumentException("OptionDef cannot be null");
+    }
+    return values.get(optionDef);
   }
 
   /**
@@ -204,7 +276,7 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
    *
    * @return the values of the options
    */
-  public Map<String, Object> values() {
+  public Map<OptionDef, Object> values() {
     return values;
   }
 
@@ -215,11 +287,12 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
    * @return the removed value of the option
    */
   public Object resetValue(String key) {
+    // TODO OptionDef key variant for all methods
     OptionDef optionDef = optionsByKey().get(key);
     if (optionDef == null) {
       throw new IllegalArgumentException(INVALID_KEY + key);
     }
-    return values.remove(optionDef.name());
+    return values.remove(optionDef);
   }
 
   /**

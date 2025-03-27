@@ -22,6 +22,7 @@ public record OptionDef(
     Method wither,
     Set<String> keys,
     OptionPath path,
+    OptionDef parent,
     Set<OptionDef> children
 ) {
 
