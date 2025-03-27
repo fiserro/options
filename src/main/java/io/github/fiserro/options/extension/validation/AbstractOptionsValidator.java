@@ -11,18 +11,18 @@ import lombok.val;
 /**
  * Abstract class for options validator.
  */
-public abstract class AbstractOptionsValidator<T extends Options<T>, B extends OptionsBuilder<T, B>>
+public abstract class AbstractOptionsValidator<T extends Options<T>>
     extends AbstractOptionsExtension {
 
   protected AbstractOptionsValidator(Class<? extends Options<?>> declaringClass) {
     super(OptionExtensionType.VALIDATION, declaringClass);
   }
 
-  public abstract Set<ConstraintViolation<T>> validate(
-      OptionsBuilder<T, B> optionsBuilder, Options<T> options);
+  public abstract Set<ConstraintViolation<T>> validate(Options<T> options,
+      OptionsBuilder<?, ?> builder);
 
   @Override
-  public void extend(OptionsBuilder<?, ?> options) {
+  public final void extend(OptionsBuilder<? extends Options<?>, ?> options) {
     throw new UnsupportedOperationException();
   }
 }

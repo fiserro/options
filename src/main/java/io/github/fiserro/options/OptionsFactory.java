@@ -14,7 +14,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -121,7 +120,8 @@ public class OptionsFactory {
 
       Preconditions.checkState(
           value == null || optionDef.wrapperType().isAssignableFrom(value.getClass()),
-          "The value of the option %s is not of the expected type %s but it is %s", optionDef.name(),
+          "The value of the option %s is not of the expected type %s but it is %s",
+          optionDef.name(),
           optionDef.javaType(), value == null ? null : value.getClass());
       builder = builder.method(named(optionDef.name()).and(takesNoArguments()))
           .intercept(MethodDelegation.to(GetValueInterceptor.class));
@@ -177,6 +177,7 @@ public class OptionsFactory {
   public static <T extends Options<T>, B extends OptionsBuilder<T, B>> T clone(T options) {
     return options.toBuilder().build();
   }
+
   /**
    * Validates the options.
    *
@@ -185,7 +186,7 @@ public class OptionsFactory {
   public static <T extends Options<T>, B extends OptionsBuilder<T, B>> Set<ConstraintViolation<T>> validate(
       Options<T> options) {
     OptionsBuilder<T, B> builder = options.toBuilder();
-    return validate(builder);
+    return validate(options, builder);
   }
 
 
@@ -194,24 +195,22 @@ public class OptionsFactory {
    *
    * @param builder the options builder to be validated
    */
-  private static <T extends Options<T>, B extends OptionsBuilder<T, B>> Set<ConstraintViolation<T>> validate(
-      OptionsBuilder<T, B> builder) {
+  private static <T extends Options<T>> Set<ConstraintViolation<T>> validate(
+      Options<T> options, OptionsBuilder<?, ?> builder) {
 
-//    List<? extends ConstraintViolation<?>> list = builder.values()
-//        .filter(OptionDef::isOptionsType)
-//        .map(options::getValue)
-//        .map(v -> (Options<?>) v)
-//        .flatMap(subOptions -> {
-//          return validate(subOptions).stream();
-//        })
-//        .toList();
+    Stream<ConstraintViolation<T>> childrenViolations = builder.values().entrySet().stream()
+        .filter(e -> e.getKey().isOptionsType())
+        .map(e -> (OptionsBuilder<?, ?>) e.getValue())
+        .flatMap(subBuilder -> validate(options, subBuilder).stream());
 
-    NavigableMap<OptionExtensionType, List<OptionsExtension>> extensions = new OptionExtensionScanner().scan(
-        builder.optionsInterface());
-    return extensions.getOrDefault(OptionExtensionType.VALIDATION, List.of())
+    Stream<ConstraintViolation<T>> violations = new OptionExtensionScanner().scan(
+            builder.optionsInterface())
+        .getOrDefault(OptionExtensionType.VALIDATION, List.of())
         .stream()
-        .map(e -> (AbstractOptionsValidator<T, B>) e)
-        .flatMap(e -> e.validate(builder, options).stream())
+        .map(e -> (AbstractOptionsValidator<T>) e)
+        .flatMap(e -> e.validate(options, builder).stream());
+
+    return Stream.concat(childrenViolations, violations)
         .collect(Collectors.toSet());
   }
 

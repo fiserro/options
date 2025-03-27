@@ -1,6 +1,8 @@
 package io.github.fiserro.options;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,16 +29,16 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
    * Creates the options builder from the given Options Class, values and program arguments.
    *
    * @param optionsClass the class of the options
+   * @param optionDefs   the options definition
    * @param values       the values of the options
    * @param <T>          the type of the options
    * @param <B>          the type of the builder
    * @return the options builder
    */
   public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
-      Class<T> optionsClass, Map<OptionDef, Object> values) {
+      Class<T> optionsClass, Collection<OptionDef> optionDefs, Map<OptionDef, Object> values) {
     Map<OptionDef, Object> valuesCopy = deepCopyMap(values);
-    Set<OptionDef> optionDefSet = new OptionScanner().scan(optionsClass);
-    return new OptionsBuilder<>(optionsClass, optionDefSet, valuesCopy);
+    return new OptionsBuilder<>(optionsClass, optionDefs, valuesCopy);
   }
 
   /**
@@ -80,7 +82,7 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
    */
   private static Object copyValue(Object value) {
     return switch (value) {
-      case Options<?> options -> options.toBuilder().values();
+      case Options<?> options -> options.toBuilder();
       case Map<?, ?> map -> deepCopyMap(map);
       case List<?> list -> list.stream().map(OptionsBuilder::copyValue).toList();
       case Set<?> set -> set.stream().map(OptionsBuilder::copyValue).collect(Collectors.toSet());
@@ -95,10 +97,10 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
    * @param optionDefs   the options definition
    * @param values       the values of the options
    */
-  private OptionsBuilder(Class<T> optionsClass, Set<OptionDef> optionDefs,
+  private OptionsBuilder(Class<T> optionsClass, Collection<OptionDef> optionDefs,
       Map<OptionDef, Object> values) {
     this.optionsClass = optionsClass;
-    this.optionDefs = optionDefs;
+    this.optionDefs = new HashSet<>(optionDefs);
     this.values = values;
     this.args = new String[0];
   }
@@ -118,20 +120,21 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
     this.values = new HashMap<>();
     this.args = args;
 
-    optionDefs.forEach(v -> {
-      if (v.isOptionsType()) {
-        Object nestedValues = values.get(v.name());
-        if (nestedValues == null) {
-          nestedValues = new HashMap<>();
+    optionDefs.forEach(optionDef -> {
+      Object value = values.get(optionDef.name());
+
+      if (optionDef.isOptionsType()) {
+        if (value == null) {
+          value = new HashMap<>();
         }
-        if (nestedValues instanceof Map<?, ?> map) {
-          this.values.put(v, new OptionsBuilder(v.classType(), v.children(), map, args));
+        if (value instanceof Map<?, ?> map) {
+          this.values.put(optionDef, new OptionsBuilder(optionDef.classType(), optionDef.children(), map, args));
         } else {
           throw new IllegalArgumentException(
-              "The nested values for '" + v.path() + "' must be a Map");
+              "The nested values for '" + optionDef.path() + "' must be a Map");
         }
-      } else {
-        this.values.put(v, values.get(v.name()));
+      } else if (value != null) {
+        this.values.put(optionDef, values.get(optionDef.name()));
       }
     });
   }

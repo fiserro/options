@@ -57,7 +57,7 @@ public abstract class AbstractOptions<T extends AbstractOptions<T>> implements O
 
   @Override
   public <B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> toBuilder(Class<T> optionsClass) {
-    return OptionsBuilder.newBuilder(optionsClass, values);
+    return OptionsBuilder.newBuilder(optionsClass, options.values(), values);
   }
 
   /**
@@ -68,7 +68,11 @@ public abstract class AbstractOptions<T extends AbstractOptions<T>> implements O
    * @return the value of the option or null if the option is not set
    */
   Object getInternalValue(String key) {
-    return values.get(key);
+    OptionDef optionDef = options.get(key);
+    if (optionDef == null) {
+      throw new IllegalArgumentException("Invalid key: " + key);
+    }
+    return values.get(optionDef);
   }
 
   /**

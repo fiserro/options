@@ -1,6 +1,7 @@
 package io.github.fiserro.options.extension.validation.jakarta;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.core.Is.is;
 
 import io.github.fiserro.options.OptionPath;
@@ -12,6 +13,7 @@ import jakarta.validation.Path;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Set;
@@ -51,10 +53,12 @@ class JakartaValidatorOptionsTest {
         ),
         Arguments.of(
             NestedCompositionOptions.class,
-            Map.of(),
+            Map.of("source", Map.of("string", "$12")),
             Set.of(
-                Pair.of(OptionPath.of("source"), NotNull.class),
-                Pair.of(OptionPath.of("target"), NotNull.class)
+                Pair.of(OptionPath.of("source", "string"), Pattern.class),
+                Pair.of(OptionPath.of("source", "listOfString"), NotNull.class),
+                Pair.of(OptionPath.of("target", "string"), NotNull.class),
+                Pair.of(OptionPath.of("target", "listOfString"), NotNull.class)
             )
         )
     );
@@ -64,18 +68,26 @@ class JakartaValidatorOptionsTest {
   @ParameterizedTest
   void exceptionIsThrownWhenRequiredOptionIsNotSet(Class<? extends Options> clazz,
       Map<String, Object> values,
-      Set<ConstraintViolation<Pair<Path, Class<? extends Annotation>>>> expectedViolations) {
+      Set<Pair<Path, Class<Annotation>>> expectedViolations) {
+
 
     Options<?> options = OptionsFactory.create(clazz, values);
     assertThat(options.isValid(), is(expectedViolations.isEmpty()));
 
     Set<? extends ConstraintViolation<?>> violations = options.validate();
 
-    Set<? extends Pair<Path, ?>> constraintViolations = violations.stream()
-        .map(c -> Pair.of(c.getPropertyPath(),
-            c.getConstraintDescriptor().getAnnotation().annotationType()))
+    Set<Pair<Path, Class<Annotation>>> violationsSimple = violations.stream()
+        .map(c -> {
+          Path path = c.getPropertyPath();
+          Class<Annotation> constraint = (Class<Annotation>) c.getConstraintDescriptor().getAnnotation().annotationType();
+          return Pair.of(path, constraint);
+        })
         .collect(Collectors.toSet());
-    assertThat(constraintViolations, Is.is(expectedViolations));
+
+    expectedViolations.forEach(ev -> {
+      assertThat(violationsSimple, hasItem(ev));
+    });
+    assertThat(violationsSimple.size(), is(expectedViolations.size()));
   }
 
   @Test

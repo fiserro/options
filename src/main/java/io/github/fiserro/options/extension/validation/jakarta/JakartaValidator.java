@@ -19,8 +19,7 @@ import lombok.val;
  * Extension that validates if all required options are set.
  */
 @Slf4j
-public class JakartaValidator<T extends Options<T>, B extends OptionsBuilder<T, B>> extends
-    AbstractOptionsValidator<T, B> {
+public class JakartaValidator<T extends Options<T>> extends AbstractOptionsValidator<T> {
 
   private final JakartaValidatorResolver validatorResolver = new HibernateValidatorResolver();
 
@@ -29,15 +28,15 @@ public class JakartaValidator<T extends Options<T>, B extends OptionsBuilder<T, 
   }
 
   @Override
-  public Set<ConstraintViolation<T>> validate(OptionsBuilder<T, B> builder, Options<T> options) {
+  public Set<ConstraintViolation<T>> validate(Options<T> options, OptionsBuilder<?, ?> builder) {
     return builder.options().stream()
         .distinct()
         .sorted(Comparator.comparing(OptionDef::name))
-        .flatMap(option -> validate(builder, options, option))
+        .flatMap(option -> validate(options, builder, option))
         .collect(Collectors.toSet());
   }
 
-  private Stream<ConstraintViolation<T>> validate(OptionsBuilder<T, B> builder, Options<T> options,
+  private Stream<ConstraintViolation<T>> validate(Options<T> options, OptionsBuilder<?, ?> builder,
       OptionDef option) {
 
     val value = getValue(builder, option);
