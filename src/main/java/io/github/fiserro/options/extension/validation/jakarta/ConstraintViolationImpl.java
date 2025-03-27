@@ -1,7 +1,7 @@
 package io.github.fiserro.options.extension.validation.jakarta;
 
 import io.github.fiserro.options.OptionDef;
-import io.github.fiserro.options.OptionsBuilder;
+import io.github.fiserro.options.Options;
 import jakarta.validation.ConstraintTarget;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintViolation;
@@ -15,17 +15,16 @@ import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hibernate.validator.internal.metadata.descriptor.ConstraintDescriptorImpl;
 
 @Getter
 @RequiredArgsConstructor
-public class ConstraintViolationImpl implements ConstraintViolation<OptionsBuilder<?, ?>> {
+public class ConstraintViolationImpl<T extends Options<T>, C extends ConstraintViolationImpl<T, C>>
+    implements ConstraintViolation<T> {
 
   private final String message;
   private final Object invalidValue;
   private final OptionDef optionDef;
-  private final OptionsBuilder<?, ?> options;
+  private final T options;
   private final Annotation annotation;
 
   @Override
@@ -34,14 +33,13 @@ public class ConstraintViolationImpl implements ConstraintViolation<OptionsBuild
   }
 
   @Override
-  public OptionsBuilder<?, ?> getRootBean() {
+  public T getRootBean() {
     return options;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public Class<OptionsBuilder<?, ?>> getRootBeanClass() {
-    return (Class<OptionsBuilder<?, ?>>) options.getClass();
+  public Class<T> getRootBeanClass() {
+    return options.toBuilder().optionsInterface();
   }
 
   @Override

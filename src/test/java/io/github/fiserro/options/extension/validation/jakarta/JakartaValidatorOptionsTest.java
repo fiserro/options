@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.core.Is;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -66,5 +67,19 @@ class JakartaValidatorOptionsTest {
             c.getConstraintDescriptor().getAnnotation().annotationType()))
         .collect(Collectors.toSet());
     assertThat(constraintViolations, Is.is(expectedViolations));
+  }
+
+  @Test
+  void simpleTest() {
+    JakartaValidatedTestOptions options = OptionsFactory.create(
+        JakartaValidatedTestOptions.class);
+    assertThat(options.isValid(), is(false));
+    Set<ConstraintViolation<JakartaValidatedTestOptions>> violations = options.validate();
+    assertThat(violations.size(), is(1));
+    ConstraintViolation<JakartaValidatedTestOptions> violation = violations.iterator().next();
+    assertThat(violation.getPropertyPath(), is(OptionPath.of("bool")));
+    assertThat(violation.getRootBean(), is(options));
+    assertThat(violation.getRootBeanClass(), is(JakartaValidatedTestOptions.class));
+    assertThat(violation.getMessage(), Is.is("@NotNull java.lang.Boolean bool = null - @jakarta.validation.constraints.NotNull(message=\"{jakarta.validation.constraints.NotNull.message}\", payload={}, groups={})"));
   }
 }

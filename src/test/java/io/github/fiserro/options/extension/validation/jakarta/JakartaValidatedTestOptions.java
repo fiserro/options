@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.experimental.FieldNameConstants;
 
-public interface JakartaValidatedTestOptions extends JakartaValidatedOptions {
+public interface JakartaValidatedTestOptions extends JakartaValidatedOptions<JakartaValidatedTestOptions> {
 
   @Size(min = 5, max = 10)
   @Option

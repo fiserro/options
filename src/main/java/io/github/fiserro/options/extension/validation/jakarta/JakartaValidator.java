@@ -19,7 +19,7 @@ import lombok.val;
  * Extension that validates if all required options are set.
  */
 @Slf4j
-public class JakartaValidator extends AbstractOptionsValidator {
+public class JakartaValidator<T extends Options<T>, B extends OptionsBuilder<T, B>> extends AbstractOptionsValidator<T,B> {
 
   private final JakartaValidatorResolver validatorResolver = new HibernateValidatorResolver();
 
@@ -28,26 +28,28 @@ public class JakartaValidator extends AbstractOptionsValidator {
   }
 
   @Override
-  public Set<ConstraintViolation<OptionsBuilder<?, ?>>> validate(OptionsBuilder<?, ?> options) {
-    return options.options().stream()
+  public Set<ConstraintViolation<T>> validate(OptionsBuilder<T, B> builder,
+      Options<T> options) {
+
+    return builder.options().stream()
         .distinct()
         .sorted(Comparator.comparing(OptionDef::name))
-        .flatMap(option -> validate(options, option))
+        .flatMap(option -> validate(builder, options, option))
         .collect(Collectors.toSet());
   }
 
-  private Stream<ConstraintViolation<OptionsBuilder<?, ?>>> validate(
-      OptionsBuilder<?, ?> options, OptionDef option) {
+  private Stream<ConstraintViolation<T>> validate(
+      OptionsBuilder<T, B> builder, Options<T> options, OptionDef option) {
 
-    val value = getValue(options, option);
+    val value = getValue(builder, option);
     return Stream.of(option.getAnnotations())
         .map(a -> validate(a, options, option, value))
         .filter(Optional::isPresent)
         .map(Optional::get);
   }
 
-  private Optional<ConstraintViolation<OptionsBuilder<?, ?>>> validate(Annotation annotation,
-      OptionsBuilder<?, ?> options, OptionDef option, Object value) {
+  private Optional<ConstraintViolation<T>> validate(Annotation annotation,
+      Options options, OptionDef option, Object value) {
     ConstraintValidator<Annotation, Object> validator = validatorResolver.getValidator(annotation,
         value);
     if (validator.isValid(value, null)) {

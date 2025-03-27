@@ -4,6 +4,6 @@ import io.github.fiserro.options.Options;
 import io.github.fiserro.options.extension.OptionsExtensions;
 
 @OptionsExtensions({JakartaValidator.class})
-public interface JakartaValidatedOptions extends Options {
+public interface JakartaValidatedOptions<T extends JakartaValidatedOptions<T>> extends Options<T> {
 
 }

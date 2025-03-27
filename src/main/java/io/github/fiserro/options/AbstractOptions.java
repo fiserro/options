@@ -73,11 +73,9 @@ public abstract class AbstractOptions<T extends AbstractOptions<T>> implements O
     return toBuilder(optionsClass);
   }
 
-
   @Override
   public Set<ConstraintViolation<T>> validate() {
-    OptionsBuilder builder = toBuilder();
-    return OptionsFactory.validate(builder);
+    return OptionsFactory.validate(this);
   }
 
   @Override

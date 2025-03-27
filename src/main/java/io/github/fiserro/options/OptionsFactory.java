@@ -180,21 +180,21 @@ public class OptionsFactory {
   }
 
   /**
-   * Validates the options builder.
+   * Validates the options.
    *
-   * @param optionsBuilder the options builder
+   * @param options the options to be validated
    */
-  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> Set<ConstraintViolation<OptionsBuilder<T, B>>> validate(
-      OptionsBuilder<T, B> optionsBuilder) {
+  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> Set<ConstraintViolation<T>> validate(
+      Options<T> options) {
+    OptionsBuilder<T, B> builder = options.toBuilder();
     NavigableMap<OptionExtensionType, List<OptionsExtension>> extensions = new OptionExtensionScanner().scan(
-        optionsBuilder.optionsInterface());
-    Set validation = extensions.getOrDefault(
+        builder.optionsInterface());
+    return extensions.getOrDefault(
             OptionExtensionType.VALIDATION, List.of())
         .stream()
-        .map(e -> (AbstractOptionsValidator) e)
-        .flatMap(e -> e.validate(optionsBuilder).stream())
+        .map(e -> (AbstractOptionsValidator<T, B>) e)
+        .flatMap(e -> e.validate(builder, options).stream())
         .collect(Collectors.toSet());
-    return validation;
   }
 
   /**
