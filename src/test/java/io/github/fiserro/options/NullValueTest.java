@@ -4,15 +4,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 
-import io.github.fiserro.options.OptionsFactory;
-import io.github.fiserro.options.test.OptionsStrings;
+import io.github.fiserro.options.test.Strings;
+import io.github.fiserro.options.test.StringsOptions;
 import org.junit.jupiter.api.Test;
 
 class NullValueTest {
 
   @Test
   void newInstanceIsCreatedWith() {
-    OptionsStrings o1 = OptionsFactory.create(OptionsStrings.class);
+    Strings o1 = OptionsFactory.create(StringsOptions.class);
     assertThat(o1.string(), is(nullValue()));
   }
 }

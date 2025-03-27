@@ -8,12 +8,12 @@ import io.github.fiserro.options.extension.OptionsExtensions;
 
 
 @OptionsExtensions({ArgumentsEquals.class, EnvironmentVariables.class})
-public interface OptionsNestedComposition extends Options {
+public interface OptionsNestedComposition extends Options<OptionsNestedComposition> {
 
   @Option
-  OptionsStrings source();
+  StringsOptions source();
 
   @Option
-  OptionsStrings target();
+  StringsOptions target();
 
 }

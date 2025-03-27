@@ -1,5 +1,6 @@
 package io.github.fiserro.options;
 
+import jakarta.validation.ConstraintViolation;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,7 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = {"optionsClass", "values"})
-public abstract class AbstractOptions<T extends Options> implements Options {
+public abstract class AbstractOptions<T extends AbstractOptions<T>> implements Options<T> {
 
   private final Class<T> optionsClass;
   private final Map<String, Object> values;
@@ -39,16 +40,15 @@ public abstract class AbstractOptions<T extends Options> implements Options {
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public T withValue(String key, Object value) {
-    OptionsBuilder<T> builder = toBuilder();
-    builder.setValue(key, value);
-    return builder.build();
+    return toBuilder()
+        .withValue(key, value)
+        .build();
   }
 
   @Override
-  public <X extends Options> OptionsBuilder<X> toBuilder(Class<X> optionsClass) {
+  public <B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> toBuilder(Class<T> optionsClass) {
     return OptionsBuilder.newBuilder(optionsClass, values);
   }
 
@@ -69,9 +69,21 @@ public abstract class AbstractOptions<T extends Options> implements Options {
    *
    * @return the options builder
    */
-  @SuppressWarnings("unchecked")
-  public OptionsBuilder<T> toBuilder() {
+  public <B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> toBuilder() {
     return toBuilder(optionsClass);
+  }
+
+
+  @Override
+  public Set<ConstraintViolation<T>> validate() {
+    // TODO
+    return Set.of();
+  }
+
+  @Override
+  public boolean isValid() {
+    // TODO
+    return false;
   }
 
   @Override

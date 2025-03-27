@@ -4,8 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.github.fiserro.options.OptionsFactory;
-import io.github.fiserro.options.test.OptionsAll;
+import io.github.fiserro.options.test.AllOptions;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,7 @@ class OptionsFactoryTest {
     values.put("string", "localhost");
     values.put("listOfString", List.of("x", "y", "z"));
 
-    OptionsAll options = OptionsFactory.create(OptionsAll.class, values);
+    AllOptions options = OptionsFactory.create(AllOptions.class, values);
     assertNotNull(options);
     assertThat(options.string(), is("localhost"));
     assertThat(options.listOfString(), is(List.of("x", "y", "z")));

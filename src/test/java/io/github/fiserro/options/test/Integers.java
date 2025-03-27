@@ -1,11 +1,10 @@
 package io.github.fiserro.options.test;
 
 import io.github.fiserro.options.Option;
-import io.github.fiserro.options.Options;
 import java.util.List;
 import java.util.Set;
 
-public interface OptionsIntegers extends Options {
+public interface Integers {
 
   @Option
   int primitiveInt();

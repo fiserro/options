@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
+import lombok.val;
 import org.apache.commons.lang3.ClassUtils;
 
 /**
@@ -14,7 +15,7 @@ import org.apache.commons.lang3.ClassUtils;
  *
  * @param <T> the type of the Options interface
  */
-public class OptionsBuilder<T extends Options> {
+public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>> {
 
   private static final String INVALID_KEY = "Invalid key: ";
   private final Class<T> optionsClass;
@@ -29,10 +30,11 @@ public class OptionsBuilder<T extends Options> {
    * @param values       the values of the options
    * @param args         the program arguments
    * @param <T>          the type of the options
+   * @param <B>          the type of the builder
    * @return the options builder
    */
-  public static <T extends Options> OptionsBuilder<T> newBuilder(Class<T> optionsClass,
-      Map<String, Object> values, String... args) {
+  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
+      Class<T> optionsClass, Map<String, Object> values, String... args) {
     Map<String, Object> valuesCopy = deepCopyMap(values);
     Set<OptionDef> optionDefSet = new OptionScanner().scan(optionsClass);
     return new OptionsBuilder<>(optionsClass, optionDefSet, valuesCopy, args);
@@ -63,7 +65,7 @@ public class OptionsBuilder<T extends Options> {
    */
   private static Object copyValue(Object value) {
     return switch (value) {
-      case Options options -> options.toBuilder().values();
+      case Options<?> options -> options.toBuilder().values();
       case Map<?, ?> map -> deepCopyMap(map);
       case List<?> list -> list.stream().map(OptionsBuilder::copyValue).toList();
       case Set<?> set -> set.stream().map(OptionsBuilder::copyValue).collect(Collectors.toSet());
@@ -93,14 +95,8 @@ public class OptionsBuilder<T extends Options> {
           nestedValues = new HashMap<>();
         }
         if (nestedValues instanceof Map<?, ?> map) {
-          //noinspection unchecked
-          OptionsBuilder<Options> nestedBuilder = new OptionsBuilder<>(
-              (Class<Options>) v.classType(),
-              v.children(),
-              (Map<String, Object>) map,
-              args
-          );
-          values.put(v.name(), nestedBuilder);
+
+          values.put(v.name(), new OptionsBuilder(v.classType(), v.children(), map, args));
         } else {
           throw new IllegalArgumentException(
               "The nested values for '" + v.path() + "' must be a Map");
@@ -131,11 +127,11 @@ public class OptionsBuilder<T extends Options> {
    * @param path  the path to the nested option
    */
   public void setValue(Object value, String... path) {
-    OptionsBuilder<?> builder = this;
+    OptionsBuilder<?, ?> builder = this;
     for (int i = 0; i < path.length - 1; i++) {
       String key = path[i];
       Object v = builder.getValueOrPrimitiveDefault(key);
-      if (v instanceof OptionsBuilder<?> nestedBuilder) {
+      if (v instanceof OptionsBuilder<?, ?> nestedBuilder) {
         builder = nestedBuilder;
       } else {
         throw new IllegalArgumentException(
@@ -143,6 +139,29 @@ public class OptionsBuilder<T extends Options> {
       }
     }
     builder.setValue(path[path.length - 1], value);
+  }
+
+  /**
+   * Sets the value of the option. The value must be of the same type as the option or String.
+   *
+   * @param key   the name of alias of the option
+   * @param value the value of the option
+   */
+  public OptionsBuilder<T, B> withValue(String key, Object value) {
+    setValue(key, value);
+    return this;
+  }
+
+  /**
+   * Sets the value of the nested option. The value must be of the same type as the option or
+   * String.
+   *
+   * @param value the value of the option
+   * @param path  the path to the nested option
+   */
+  public OptionsBuilder<T, B> withValue(Object value, String... path) {
+    setValue(value, path);
+    return this;
   }
 
   /**
@@ -247,7 +266,7 @@ public class OptionsBuilder<T extends Options> {
    *
    * @return the class of the options interface
    */
-  public Class<? extends Options> optionsInterface() {
+  public Class<T> optionsInterface() {
     return optionsClass;
   }
 
@@ -267,7 +286,7 @@ public class OptionsBuilder<T extends Options> {
 
   @Override
   public boolean equals(Object other) {
-    if (other instanceof OptionsBuilder<?> o) {
+    if (other instanceof OptionsBuilder<?, ?> o) {
       return optionsClass.equals(o.optionsClass) && values.equals(o.values());
     }
     return false;

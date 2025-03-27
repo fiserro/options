@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-public interface OptionsDateTime extends Options {
+public interface DateTime {
 
   Date DEFAULT_DATE = new Date();
   LocalDate DEFAULT_LOCAL_DATE = LocalDate.now();

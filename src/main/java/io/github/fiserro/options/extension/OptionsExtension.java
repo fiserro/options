@@ -22,7 +22,7 @@ public interface OptionsExtension {
    *
    * @param options the Options instance to extend
    */
-  void extend(OptionsBuilder<? extends Options> options);
+  void extend(OptionsBuilder<? extends Options<?>, ?> options);
 
   /**
    * Returns the type of the extension. Some extensions are exclusive and cannot be combined with
@@ -37,5 +37,5 @@ public interface OptionsExtension {
    *
    * @return the class that declares the extension
    */
-  Class<? extends Options> declaringClass();
+  Class<? extends Options<?>> declaringClass();
 }

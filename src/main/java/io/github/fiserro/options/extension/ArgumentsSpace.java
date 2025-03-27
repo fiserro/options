@@ -9,12 +9,12 @@ import io.github.fiserro.options.OptionsBuilder;
  */
 public class ArgumentsSpace extends OptionsExtensionSettingValues {
 
-  public ArgumentsSpace(Class<? extends Options> declaringClass) {
+  public ArgumentsSpace(Class<? extends Options<?>> declaringClass) {
     super("program argument", OptionExtensionType.LOAD_FROM_ARGS, declaringClass);
   }
 
   @Override
-  public void extend(OptionsBuilder<? extends Options> options) {
+  public void extend(OptionsBuilder<?, ?> options) {
     String[] args = options.args();
     for (int i = 0; i < args.length; i += 2) {
       String argName = args[i];

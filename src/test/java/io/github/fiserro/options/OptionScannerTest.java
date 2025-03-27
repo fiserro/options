@@ -3,11 +3,9 @@ package io.github.fiserro.options;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-import io.github.fiserro.options.OptionDef;
-import io.github.fiserro.options.OptionScanner;
-import io.github.fiserro.options.test.OptionsAll;
-import io.github.fiserro.options.test.OptionsDuplicates;
-import io.github.fiserro.options.test.OptionsWith;
+import io.github.fiserro.options.test.AllOptions;
+import io.github.fiserro.options.test.DuplicatesOptions;
+import io.github.fiserro.options.test.StringsOptionsWith;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +15,7 @@ class OptionScannerTest {
 
   @Test
   void scanOwnOptions() {
-    Map<String, OptionDef> options = scanner.scanByKeys(OptionsAll.class);
+    Map<String, OptionDef> options = scanner.scanByKeys(AllOptions.class);
     assertThat(options.size(), is(98));
     assertThat(options.get("DATE").description(), is("Date option"));
 //    assertThat(options.get("DATE").required(), is(false)); // TODO
@@ -26,7 +24,7 @@ class OptionScannerTest {
 
   @Test
   void scanChildOptions() {
-    Map<String, OptionDef> options = scanner.scanByName(OptionsDuplicates.class);
+    Map<String, OptionDef> options = scanner.scanByName(DuplicatesOptions.class);
     assertThat(options.size(), is(20));
     assertThat("Overridden option added default value",
         options.get("primitiveIntWithDefault").hasDefaultValue(), is(true));
@@ -38,7 +36,7 @@ class OptionScannerTest {
 
   @Test
   void witherMethodScanned() {
-    Map<String, OptionDef> options = scanner.scanByName(OptionsWith.class);
+    Map<String, OptionDef> options = scanner.scanByName(StringsOptionsWith.class);
     assertThat("Wither method scanned", options.get("string").hasWither(), is(true));
   }
 

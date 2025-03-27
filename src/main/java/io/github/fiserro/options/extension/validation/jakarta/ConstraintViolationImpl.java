@@ -20,12 +20,12 @@ import org.hibernate.validator.internal.metadata.descriptor.ConstraintDescriptor
 
 @Getter
 @RequiredArgsConstructor
-public class ConstraintViolationImpl implements ConstraintViolation<OptionsBuilder<?>> {
+public class ConstraintViolationImpl implements ConstraintViolation<OptionsBuilder<?, ?>> {
 
   private final String message;
   private final Object invalidValue;
   private final OptionDef optionDef;
-  private final OptionsBuilder<?> options;
+  private final OptionsBuilder<?, ?> options;
   private final Annotation annotation;
 
   @Override
@@ -34,14 +34,14 @@ public class ConstraintViolationImpl implements ConstraintViolation<OptionsBuild
   }
 
   @Override
-  public OptionsBuilder<?> getRootBean() {
+  public OptionsBuilder<?, ?> getRootBean() {
     return options;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public Class<OptionsBuilder<?>> getRootBeanClass() {
-    return (Class<OptionsBuilder<?>>) options.getClass();
+  public Class<OptionsBuilder<?, ?>> getRootBeanClass() {
+    return (Class<OptionsBuilder<?, ?>>) options.getClass();
   }
 
   @Override

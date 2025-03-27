@@ -4,6 +4,6 @@ import io.github.fiserro.options.extension.ArgumentsSpace;
 import io.github.fiserro.options.extension.OptionsExtensions;
 
 @OptionsExtensions({ArgumentsSpace.class})
-public interface OptionsOverridingExtension extends OptionsAll {
+public interface OptionsOverridingExtension extends AllOptions {
 
 }

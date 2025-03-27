@@ -6,21 +6,14 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-import io.github.fiserro.options.OptionDef;
-import io.github.fiserro.options.OptionScanner;
-import io.github.fiserro.options.Options;
-import io.github.fiserro.options.OptionsBuilder;
-import io.github.fiserro.options.OptionsFactory;
-import io.github.fiserro.options.test.OptionsAll;
-import io.github.fiserro.options.test.OptionsDateTime;
-import io.github.fiserro.options.test.OptionsDependentDefaults;
-import io.github.fiserro.options.test.OptionsDuplicates;
-import io.github.fiserro.options.test.OptionsEnum;
-import io.github.fiserro.options.test.OptionsEnum.TestEnum;
-import io.github.fiserro.options.test.OptionsIntegers;
-import io.github.fiserro.options.test.OptionsLongs;
-import io.github.fiserro.options.test.OptionsOverridingDefaults;
-import io.github.fiserro.options.test.OptionsStrings;
+import io.github.fiserro.options.test.AllOptions;
+import io.github.fiserro.options.test.DateTimeOptions;
+import io.github.fiserro.options.test.Enum.TestEnum;
+import io.github.fiserro.options.test.EnumOptions;
+import io.github.fiserro.options.test.IntegersOptions;
+import io.github.fiserro.options.test.*;
+import io.github.fiserro.options.test.DuplicatesOptions;
+import io.github.fiserro.options.test.OverridingDefaultsOptions;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -44,17 +37,19 @@ class GeneralOptionsTest {
   /**
    * List of options classes to test.
    */
-  private final List<Class<? extends Options>> optionsClasses = List.of(
-      OptionsIntegers.class,
-      OptionsLongs.class,
-      OptionsDateTime.class,
-      OptionsStrings.class,
-      OptionsEnum.class,
-      OptionsDependentDefaults.class,
-      OptionsDuplicates.class,
-      OptionsOverridingDefaults.class,
-      OptionsAll.class
+  private final List<Class<? extends Options<?>>> optionsClasses = List.of(
+      IntegersOptions.class,
+      LongsOptions.class,
+      DateTimeOptions.class,
+      StringsOptions.class,
+      EnumOptions.class,
+      DependentDefaultsOptions.class,
+      DuplicatesOptions.class,
+      OverridingDefaultsOptions.class,
+      AllOptions.class
   );
+
+
 
   /**
    * Sample values for each type of option.
@@ -76,7 +71,7 @@ class GeneralOptionsTest {
   @ParameterizedTest(name = "{0} {2}")
   @MethodSource("optionCases")
   void checkOption(String stringValue, Object expectedValue, OptionDef option,
-      OptionsBuilder<?> optionsBuilder) {
+      OptionsBuilder<?, ?> optionsBuilder) {
 
     assertThat("Every option in the " + optionsBuilder
             + " has to be tested but there is no sample value for "
@@ -125,17 +120,18 @@ class GeneralOptionsTest {
   Stream<Arguments> optionCases() {
     return optionsClasses.stream()
         .flatMap(optionsClass -> {
-          OptionsTestHelper<?> helper = new OptionsTestHelper<>(optionsClass);
+          @SuppressWarnings({"unchecked", "rawtypes"})
+          OptionsTestHelper helper = new OptionsTestHelper((Class) optionsClass);
           return helper.optionCases();
         });
   }
 
-  private class OptionsTestHelper<T extends Options> {
+  private class OptionsTestHelper {
 
-    private final OptionsBuilder<T> optionsBuilder;
+    private final OptionsBuilder<?, ?> optionsBuilder;
     private final Map<String, OptionDef> optionsByName;
 
-    private OptionsTestHelper(Class<T> optionsClass) {
+    private <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsTestHelper(Class<T> optionsClass) {
 
       optionsBuilder = OptionsFactory.newBuilder(optionsClass, new HashMap<>());
       optionsByName = new OptionScanner().scanByName(optionsClass);

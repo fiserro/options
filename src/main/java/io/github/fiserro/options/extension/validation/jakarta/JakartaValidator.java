@@ -23,13 +23,12 @@ public class JakartaValidator extends AbstractOptionsValidator {
 
   private final JakartaValidatorResolver validatorResolver = new HibernateValidatorResolver();
 
-  public JakartaValidator(Class<? extends Options> declaringClass) {
+  public JakartaValidator(Class<? extends Options<?>> declaringClass) {
     super(declaringClass);
   }
 
   @Override
-  protected Set<ConstraintViolation<OptionsBuilder<?>>> validate(
-      OptionsBuilder<? extends Options> options) {
+  protected Set<ConstraintViolation<OptionsBuilder<?, ?>>> validate(OptionsBuilder<?, ?> options) {
     return options.options().stream()
         .distinct()
         .sorted(Comparator.comparing(OptionDef::name))
@@ -37,8 +36,8 @@ public class JakartaValidator extends AbstractOptionsValidator {
         .collect(Collectors.toSet());
   }
 
-  private Stream<ConstraintViolation<OptionsBuilder<?>>> validate(
-      OptionsBuilder<? extends Options> options, OptionDef option) {
+  private Stream<ConstraintViolation<OptionsBuilder<?, ?>>> validate(
+      OptionsBuilder<?, ?> options, OptionDef option) {
 
     val value = getValue(options, option);
     return Stream.of(option.getAnnotations())
@@ -47,8 +46,8 @@ public class JakartaValidator extends AbstractOptionsValidator {
         .map(Optional::get);
   }
 
-  private Optional<ConstraintViolation<OptionsBuilder<?>>> validate(Annotation annotation,
-      OptionsBuilder<? extends Options> options, OptionDef option, Object value) {
+  private Optional<ConstraintViolation<OptionsBuilder<?, ?>>> validate(Annotation annotation,
+      OptionsBuilder<?, ?> options, OptionDef option, Object value) {
     ConstraintValidator<Annotation, Object> validator = validatorResolver.getValidator(annotation,
         value);
     if (validator.isValid(value, null)) {
@@ -60,7 +59,7 @@ public class JakartaValidator extends AbstractOptionsValidator {
     return Optional.of(new ConstraintViolationImpl(message, value, option, options, annotation));
   }
 
-  private Object getValue(OptionsBuilder<? extends Options> options, OptionDef option) {
+  private Object getValue(OptionsBuilder<?, ?> options, OptionDef option) {
     try {
       return options.getValueOrPrimitiveDefault(option.name());
     } catch (Exception ignored) {

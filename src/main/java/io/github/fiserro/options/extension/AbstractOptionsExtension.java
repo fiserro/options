@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 public abstract class AbstractOptionsExtension implements OptionsExtension {
 
   private final OptionExtensionType type;
-  private final Class<? extends Options> declaringClass;
+  private final Class<? extends Options<?>> declaringClass;
 
   @Override
   public OptionExtensionType type() {
@@ -18,7 +18,7 @@ public abstract class AbstractOptionsExtension implements OptionsExtension {
   }
 
   @Override
-  public Class<? extends Options> declaringClass() {
+  public Class<? extends Options<?>> declaringClass() {
     return declaringClass;
   }
 }

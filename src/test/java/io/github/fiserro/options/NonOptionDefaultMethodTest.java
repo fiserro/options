@@ -3,9 +3,9 @@ package io.github.fiserro.options;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-import io.github.fiserro.options.OptionsFactory;
-import io.github.fiserro.options.test.OptionsAll;
-import io.github.fiserro.options.test.OptionsEnum.TestEnum;
+import io.github.fiserro.options.test.DefaultMethodOptions;
+import io.github.fiserro.options.test.DefaultMethodOptions.AppInfo;
+import io.github.fiserro.options.test.Enum.TestEnum;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -22,35 +22,9 @@ class NonOptionDefaultMethodTest {
         "string", "unit",
         "enumValue", TestEnum.ONE
     );
-    OptionsWithDefaultMethod options = OptionsFactory.create(OptionsWithDefaultMethod.class,
+    DefaultMethodOptions options = OptionsFactory.create(DefaultMethodOptions.class,
         values);
     assertThat(options.appInfo(), is(new AppInfo(6, "unit", TestEnum.ONE)));
     assertThat(options.appInfo(5), is(new AppInfo(5, "unit", TestEnum.ONE)));
-  }
-
-  public interface OptionsWithDefaultMethod extends OptionsAll {
-
-    /**
-     * To test the default method.
-     *
-     * @return the app info
-     */
-    default AppInfo appInfo() {
-      return new AppInfo(integer(), string(), enumValue());
-    }
-
-    /**
-     * To test the default method with parameters.
-     *
-     * @param param some parameter
-     * @return the app info
-     */
-    default AppInfo appInfo(int param) {
-      return new AppInfo(param, string(), enumValue());
-    }
-  }
-
-  public record AppInfo(Integer integer, String string, TestEnum enumeration) {
-
   }
 }

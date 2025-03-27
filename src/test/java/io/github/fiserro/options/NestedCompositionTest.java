@@ -5,12 +5,9 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-import io.github.fiserro.options.OptionPath;
-import io.github.fiserro.options.OptionsBuilder;
-import io.github.fiserro.options.OptionsFactory;
 import io.github.fiserro.options.extension.Envio;
 import io.github.fiserro.options.test.OptionsNestedComposition;
-import io.github.fiserro.options.test.OptionsStrings;
+import io.github.fiserro.options.test.Strings;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -39,10 +36,10 @@ class NestedCompositionTest {
     OptionsNestedComposition options = OptionsFactory
         .create(OptionsNestedComposition.class, "--source.string=text",
             "--target.listOfString=x,y,z");
-    OptionsBuilder<OptionsNestedComposition> builder = options.toBuilder();
 
-    builder.setValue("new text", "source", "string");
-    options = builder.build();
+    options = options.toBuilder()
+        .withValue("new text", "source", "string")
+        .build();
 
     assertThat(options.source().string(), is("new text"));
   }
@@ -57,7 +54,7 @@ class NestedCompositionTest {
     OptionsNestedComposition options = OptionsFactory.create(OptionsNestedComposition.class);
     Envio.clear();
 
-    OptionsStrings source = options.source();
+    Strings source = options.source();
     assertThat(source.string(), is("source input"));
     assertThat(source.stringWithDefault(), is("default"));
     assertThat(source.listOfString(), nullValue());
@@ -65,7 +62,7 @@ class NestedCompositionTest {
     assertThat(source.setOfString(), nullValue());
     assertThat(source.setOfStringWithDefault(), is(Set.of("a", "b", "c")));
 
-    OptionsStrings target = options.target();
+    Strings target = options.target();
     assertThat(target.string(), nullValue());
     assertThat(target.stringWithDefault(), is("default"));
     assertThat(target.listOfString(), is(Arrays.asList("x", "y", "z")));
@@ -78,7 +75,7 @@ class NestedCompositionTest {
   @MethodSource("arguments")
   void createNestedFromDifferentSources(OptionsNestedComposition options) {
 
-    OptionsStrings source = options.source();
+    Strings source = options.source();
     assertThat(source.string(), is("text"));
     assertThat(source.stringWithDefault(), is("default"));
     assertThat(source.listOfString(), nullValue());
@@ -86,7 +83,7 @@ class NestedCompositionTest {
     assertThat(source.setOfString(), nullValue());
     assertThat(source.setOfStringWithDefault(), is(Set.of("a", "b", "c")));
 
-    OptionsStrings target = options.target();
+    Strings target = options.target();
     assertThat(target.string(), nullValue());
     assertThat(target.stringWithDefault(), is("default"));
     assertThat(target.listOfString(), is(Arrays.asList("x", "y", "z")));

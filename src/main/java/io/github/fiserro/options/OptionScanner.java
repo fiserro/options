@@ -85,9 +85,9 @@ public class OptionScanner {
     if (!clazz.isInterface()) {
       throw new IllegalArgumentException("Options class must be an interface");
     }
-    if (!Options.class.isAssignableFrom(clazz)) {
-      throw new IllegalArgumentException("Options class must implement Options interface");
-    }
+//    if (!Options.class.isAssignableFrom(clazz)) {
+//      throw new IllegalArgumentException("Options class must implement Options interface");
+//    }
 
     loadWithers(clazz, withers);
 
@@ -103,7 +103,7 @@ public class OptionScanner {
         .collect(Collectors.toMap(OptionDef::name, o -> o));
 
     Map<String, OptionDef> parentOptions = Stream.of(clazz.getInterfaces())
-        .filter(Options.class::isAssignableFrom)
+//        .filter(Options.class::isAssignableFrom)
         .flatMap(i -> scan(i, withers, path).stream())
         .flatMap(o -> o.keys().stream().map(k -> Map.entry(k, o)))
         // Handle parent/child name conflict by skipping - parent option has lower priority

@@ -11,12 +11,12 @@ import java.util.stream.Stream;
  */
 public class ArgumentsEquals extends OptionsExtensionSettingValues {
 
-  public ArgumentsEquals(Class<? extends Options> declaringClass) {
+  public ArgumentsEquals(Class<? extends Options<?>> declaringClass) {
     super("program argument", OptionExtensionType.LOAD_FROM_ARGS, declaringClass);
   }
 
   @Override
-  public void extend(OptionsBuilder<? extends Options> options) {
+  public void extend(OptionsBuilder<?, ?> options) {
     Stream.of(options.args())
         .forEach(arg -> {
           if (!arg.startsWith("--")) {

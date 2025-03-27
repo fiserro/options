@@ -1,10 +1,9 @@
 package io.github.fiserro.options.test;
 
 import io.github.fiserro.options.Option;
-import io.github.fiserro.options.Options;
 import java.util.List;
 
-public interface OptionsDependentDefaults extends Options {
+public interface DependentDefaults {
 
   @Option
   int count();

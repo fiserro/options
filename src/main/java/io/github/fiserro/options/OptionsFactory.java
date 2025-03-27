@@ -42,7 +42,7 @@ public class OptionsFactory {
    * @param <T>          the type of the options
    * @return the options instance
    */
-  public static <T extends Options> T create(Class<T> optionsClass, String... args) {
+  public static <T extends Options<T>> T create(Class<T> optionsClass, String... args) {
     return create(optionsClass, new HashMap<>(), args);
   }
 
@@ -57,11 +57,12 @@ public class OptionsFactory {
    * @param values       the values of the options
    * @param args         the program arguments
    * @param <T>          the type of the options
+   * @param <B>          the type of the builder
    * @return the options instance
    */
-  public static <T extends Options> T create(Class<T> optionsClass, Map<String, Object> values,
-      String... args) {
-    OptionsBuilder<T> optionsBuilder = newBuilder(optionsClass, values, args);
+  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> T create(
+      Class<T> optionsClass, Map<String, Object> values, String... args) {
+    OptionsBuilder<T, B> optionsBuilder = newBuilder(optionsClass, values, args);
     return buildOptions(optionsBuilder);
   }
 
@@ -72,10 +73,11 @@ public class OptionsFactory {
    * @param values       the values of the options
    * @param args         the program arguments
    * @param <T>          the type of the options
+   * @param <B>          the type of the builder
    * @return the options builder
    */
-  public static <T extends Options> OptionsBuilder<T> newBuilder(Class<T> optionsClass,
-      Map<String, Object> values, String... args) {
+  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
+      Class<T> optionsClass, Map<String, Object> values, String... args) {
     return OptionsBuilder.newBuilder(optionsClass, values, args);
   }
 
@@ -85,10 +87,12 @@ public class OptionsFactory {
    *
    * @param optionsBuilder the options builder
    * @param <T>            the type of the options
+   * @param <B>            the type of the builder
    * @return the options builder
    */
   @SneakyThrows
-  public static <T extends Options> T buildOptions(OptionsBuilder<T> optionsBuilder) {
+  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> T buildOptions(
+      OptionsBuilder<T, B> optionsBuilder) {
 
     applyExtensions(optionsBuilder);
 
@@ -104,7 +108,7 @@ public class OptionsFactory {
       }
       Object value = optionsBuilder.getValueOrPrimitiveDefault(name);
       if (optionDef.isOptionsType()) {
-        optionsBuilder.setValue(name, buildOptions((OptionsBuilder<?>) value));
+        optionsBuilder.setValue(name, buildOptions((OptionsBuilder<?, ?>) value));
         value = optionsBuilder.getValueOrPrimitiveDefault(name);
       }
       if (value != null && !optionsBuilder.values().containsKey(name)) {
@@ -136,15 +140,6 @@ public class OptionsFactory {
     }
   }
 
-//  @NoArgsConstructor(access = AccessLevel.PRIVATE)
-//  public static class GetOptionsInterceptor {
-//
-//    @RuntimeType
-//    public static Set<OptionDef> intercept(@This AbstractOptions<?> self, @Origin Method method) {
-//      return self.options();
-//    }
-//  }
-
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   public static class GetValueInterceptor {
 
@@ -175,13 +170,8 @@ public class OptionsFactory {
    * @return the cloned options instance
    */
   @SneakyThrows
-  public static <T extends Options> T clone(T options) {
-    if (options instanceof AbstractOptions<?> subOptions) {
-      //noinspection unchecked
-      OptionsBuilder<T> optionsBuilder = (OptionsBuilder<T>) subOptions.toBuilder();
-      return buildOptions(optionsBuilder);
-    }
-    throw new IllegalArgumentException("The options must be an instance of SubOptions");
+  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> T clone(T options) {
+    return options.toBuilder().build();
   }
 
   /**
@@ -189,7 +179,8 @@ public class OptionsFactory {
    *
    * @param optionsBuilder the options builder
    */
-  private static <T extends Options> void applyExtensions(OptionsBuilder<T> optionsBuilder) {
+  private static <T extends Options<T>, B extends OptionsBuilder<T, B>> void applyExtensions(
+      OptionsBuilder<T, B> optionsBuilder) {
     OptionExtensionScanner scanner = new OptionExtensionScanner();
     Map<OptionExtensionType, List<OptionsExtension>> extensions = scanner.scan(
         optionsBuilder.optionsInterface());

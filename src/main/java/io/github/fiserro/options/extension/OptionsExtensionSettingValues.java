@@ -18,7 +18,7 @@ public abstract class OptionsExtensionSettingValues extends AbstractOptionsExten
   private final String sourceType;
 
   protected OptionsExtensionSettingValues(String sourceType, OptionExtensionType type,
-      Class<? extends Options> declaringClass) {
+      Class<? extends Options<?>> declaringClass) {
     super(type, declaringClass);
     this.sourceType = sourceType;
   }
@@ -32,7 +32,7 @@ public abstract class OptionsExtensionSettingValues extends AbstractOptionsExten
    * @param sourceName     the name of the source of the value
    * @param path           nested key path to the option
    */
-  protected void setValue(OptionsBuilder<? extends Options> optionsBuilder, Object value,
+  protected void setValue(OptionsBuilder<?, ?> optionsBuilder, Object value,
       String sourceName, String... path) {
     if (value == null) {
       return;
@@ -48,7 +48,7 @@ public abstract class OptionsExtensionSettingValues extends AbstractOptionsExten
       Preconditions.checkState(optionDef.isOptionsType(),
           "Nested values are allowed only for options of type Options");
       Object builderValue = optionsBuilder.getValueOrPrimitiveDefault(key);
-      if (builderValue instanceof OptionsBuilder<?> nestedBuilder) {
+      if (builderValue instanceof OptionsBuilder<?, ?> nestedBuilder) {
         setValue(nestedBuilder, value, sourceName, Arrays.copyOfRange(path, 1, path.length));
       } else {
         throw new IllegalArgumentException(
@@ -78,7 +78,7 @@ public abstract class OptionsExtensionSettingValues extends AbstractOptionsExten
    * @param key     key to the option
    * @return the value of the option or null
    */
-  private Object tryGetValue(OptionsBuilder<? extends Options> options, String key) {
+  private Object tryGetValue(OptionsBuilder<?, ?> options, String key) {
     try {
       return options.getValueOrPrimitiveDefault(key);
     } catch (Exception ignored) {

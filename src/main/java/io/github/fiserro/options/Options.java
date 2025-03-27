@@ -1,12 +1,13 @@
 package io.github.fiserro.options;
 
+import jakarta.validation.ConstraintViolation;
 import java.util.Set;
 
 /**
  * Interface for the Options object. The Options object is a container for the options of the
  * application. It is used to set and get the values of the options.
  */
-public interface Options {
+public interface Options<T extends Options<T>> {
 
   /**
    * Returns the set of the option definitions.
@@ -29,9 +30,10 @@ public interface Options {
    * this you can create a different type of options with the same values.
    *
    * @param optionsClass the class of the options
+   * @param <B>          the type of the builder
    * @return the options builder
    */
-  <T extends Options> OptionsBuilder<T> toBuilder(Class<T> optionsClass);
+  <B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> toBuilder(Class<T> optionsClass);
 
   /**
    * Creates a new instance of the {@link OptionsBuilder} for the same options class. If you need to
@@ -40,7 +42,7 @@ public interface Options {
    * @return the options builder
    * @see #toBuilder(Class)
    */
-  <T extends Options> OptionsBuilder<T> toBuilder();
+  <B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> toBuilder();
 
   /**
    * Returns new instance of the options with changed value of the option.
@@ -49,5 +51,19 @@ public interface Options {
    * @param value the value of the option
    * @return the new instance of the options
    */
-  <T extends Options> T withValue(String key, Object value);
+  T withValue(String key, Object value);
+
+  /**
+   * Validates the options and returns the set of the constraint violations.
+   *
+   * @return the set of the constraint violations
+   */
+  Set<ConstraintViolation<T>> validate();
+
+  /**
+   * Returns true if the options are valid.
+   *
+   * @return true if the options are valid
+   */
+  boolean isValid();
 }

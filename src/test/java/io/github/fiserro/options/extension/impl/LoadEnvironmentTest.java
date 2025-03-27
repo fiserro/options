@@ -5,7 +5,7 @@ import static org.hamcrest.core.Is.is;
 
 import io.github.fiserro.options.OptionsFactory;
 import io.github.fiserro.options.extension.Envio;
-import io.github.fiserro.options.test.OptionsAll;
+import io.github.fiserro.options.test.AllOptions;
 import org.junit.jupiter.api.Test;
 
 class LoadEnvironmentTest {
@@ -17,8 +17,8 @@ class LoadEnvironmentTest {
     Envio.setVar("PRIMITIVE_INT", "5");
     Envio.setVar("STRING", "test");
 
-    OptionsAll options = OptionsFactory.create(OptionsAll.class);
-    assertThat(options.enumValue(), is(OptionsAll.TestEnum.TWO));
+    AllOptions options = OptionsFactory.create(AllOptions.class);
+    assertThat(options.enumValue(), is(AllOptions.TestEnum.TWO));
     assertThat(options.primitiveInt(), is(5));
     assertThat(options.string(), is("test"));
 
@@ -35,8 +35,8 @@ class LoadEnvironmentTest {
     Envio.setVar("ANOTHER_PRIMITIVE_INT", "10");
     Envio.setVar("PRIMITIVE_INT", "$ANOTHER_PRIMITIVE_INT");
 
-    OptionsAll options = OptionsFactory.create(OptionsAll.class);
-    assertThat(options.enumValue(), is(OptionsAll.TestEnum.THREE));
+    AllOptions options = OptionsFactory.create(AllOptions.class);
+    assertThat(options.enumValue(), is(AllOptions.TestEnum.THREE));
     assertThat(options.primitiveInt(), is(10));
   }
 

@@ -11,12 +11,12 @@ import java.util.stream.Collectors;
  */
 public class EnvironmentVariables extends OptionsExtensionSettingValues {
 
-  public EnvironmentVariables(Class<? extends Options> declaringClass) {
+  public EnvironmentVariables(Class<? extends Options<?>> declaringClass) {
     super("environment variable", OptionExtensionType.LOAD_FROM_ENV, declaringClass);
   }
 
   @Override
-  public void extend(OptionsBuilder<? extends Options> options) {
+  public void extend(OptionsBuilder<?, ?> options) {
     getNestedKeys(options).forEach((env, path) -> {
       String value = Envio.getVar(env);
       if (value != null && value.startsWith("$")) {
@@ -30,12 +30,12 @@ public class EnvironmentVariables extends OptionsExtensionSettingValues {
     });
   }
 
-  protected Map<String, String[]> getNestedKeys(OptionsBuilder<? extends Options> options) {
+  protected Map<String, String[]> getNestedKeys(OptionsBuilder<?, ?> options) {
     return options.options().stream()
         .flatMap(o -> {
           if (o.isOptionsType()) {
             return getNestedKeys(
-                (OptionsBuilder<? extends Options>) options.getValueOrPrimitiveDefault(o.name()))
+                (OptionsBuilder<?, ?>) options.getValueOrPrimitiveDefault(o.name()))
                 .keySet()
                 .stream()
                 .flatMap(n -> o.keys().stream().map(k -> k + "__" + n));
@@ -45,5 +45,4 @@ public class EnvironmentVariables extends OptionsExtensionSettingValues {
         })
         .collect(Collectors.toMap(k -> k, k -> k.split("__")));
   }
-
 }

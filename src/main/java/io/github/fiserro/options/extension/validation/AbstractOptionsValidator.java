@@ -13,15 +13,15 @@ import lombok.val;
  */
 public abstract class AbstractOptionsValidator extends AbstractOptionsExtension {
 
-  protected AbstractOptionsValidator(Class<? extends Options> declaringClass) {
+  protected AbstractOptionsValidator(Class<? extends Options<?>> declaringClass) {
     super(OptionExtensionType.VALIDATION, declaringClass);
   }
 
-  protected abstract Set<ConstraintViolation<OptionsBuilder<?>>> validate(
-      OptionsBuilder<? extends Options> options);
+  protected abstract Set<ConstraintViolation<OptionsBuilder<?, ?>>> validate(
+      OptionsBuilder<?, ?> options);
 
   @Override
-  public void extend(OptionsBuilder<? extends Options> options) {
+  public void extend(OptionsBuilder<?, ?> options) {
     val validation = validate(options);
     if (!validation.isEmpty()) {
       // Could be improved by collecting validation from all validators in options factoring
