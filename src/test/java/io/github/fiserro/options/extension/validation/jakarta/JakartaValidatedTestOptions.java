@@ -6,6 +6,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import lombok.experimental.FieldNameConstants;
 
 public interface JakartaValidatedTestOptions extends JakartaValidatedOptions {
 

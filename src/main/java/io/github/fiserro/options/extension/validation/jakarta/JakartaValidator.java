@@ -28,7 +28,7 @@ public class JakartaValidator extends AbstractOptionsValidator {
   }
 
   @Override
-  protected Set<ConstraintViolation<OptionsBuilder<?, ?>>> validate(OptionsBuilder<?, ?> options) {
+  public Set<ConstraintViolation<OptionsBuilder<?, ?>>> validate(OptionsBuilder<?, ?> options) {
     return options.options().stream()
         .distinct()
         .sorted(Comparator.comparing(OptionDef::name))

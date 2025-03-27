@@ -2,14 +2,10 @@ package io.github.fiserro.options.extension.validation.jakarta;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.text.MatchesPattern.matchesPattern;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.github.fiserro.options.OptionPath;
 import io.github.fiserro.options.Options;
 import io.github.fiserro.options.OptionsFactory;
-import io.github.fiserro.options.extension.validation.ValidateOptionsException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Path;
 import jakarta.validation.constraints.DecimalMax;
@@ -60,19 +56,15 @@ class JakartaValidatorOptionsTest {
       Map<String, Object> values,
       Set<ConstraintViolation<Pair<Path, Class<? extends Annotation>>>> expectedViolations) {
 
-    if (expectedViolations.isEmpty()) {
-      assertDoesNotThrow(() -> OptionsFactory.create(clazz, values));
-    } else {
-      ValidateOptionsException exception = assertThrows(ValidateOptionsException.class,
-          () -> OptionsFactory.create(clazz, values));
-      assertThat(exception.getMessage(),
-          matchesPattern("(?s)" + expectedViolations.size() + " options validation failed:.*"));
-      assertThat(exception.getValidation().size(), is(expectedViolations.size()));
-      Set<? extends Pair<Path, ?>> constraintViolations = exception.getValidation().stream()
-          .map(c -> Pair.of(c.getPropertyPath(),
-              c.getConstraintDescriptor().getAnnotation().annotationType()))
-          .collect(Collectors.toSet());
-      assertThat(constraintViolations, Is.is(expectedViolations));
-    }
+    Options<?> options = OptionsFactory.create(clazz, values);
+    assertThat(options.isValid(), is(expectedViolations.isEmpty()));
+
+    Set<? extends ConstraintViolation<?>> violations = options.validate();
+
+    Set<? extends Pair<Path, ?>> constraintViolations = violations.stream()
+        .map(c -> Pair.of(c.getPropertyPath(),
+            c.getConstraintDescriptor().getAnnotation().annotationType()))
+        .collect(Collectors.toSet());
+    assertThat(constraintViolations, Is.is(expectedViolations));
   }
 }

@@ -7,11 +7,16 @@ import com.google.common.base.Preconditions;
 import io.github.fiserro.options.extension.OptionExtensionScanner;
 import io.github.fiserro.options.extension.OptionExtensionType;
 import io.github.fiserro.options.extension.OptionsExtension;
+import io.github.fiserro.options.extension.validation.AbstractOptionsValidator;
+import jakarta.validation.ConstraintViolation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -175,6 +180,24 @@ public class OptionsFactory {
   }
 
   /**
+   * Validates the options builder.
+   *
+   * @param optionsBuilder the options builder
+   */
+  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> Set<ConstraintViolation<OptionsBuilder<T, B>>> validate(
+      OptionsBuilder<T, B> optionsBuilder) {
+    NavigableMap<OptionExtensionType, List<OptionsExtension>> extensions = new OptionExtensionScanner().scan(
+        optionsBuilder.optionsInterface());
+    Set validation = extensions.getOrDefault(
+            OptionExtensionType.VALIDATION, List.of())
+        .stream()
+        .map(e -> (AbstractOptionsValidator) e)
+        .flatMap(e -> e.validate(optionsBuilder).stream())
+        .collect(Collectors.toSet());
+    return validation;
+  }
+
+  /**
    * Applies the extensions to the options builder.
    *
    * @param optionsBuilder the options builder
@@ -194,11 +217,11 @@ public class OptionsFactory {
         .flatMap(List::stream)
         .forEach(extension -> extension.extend(optionsBuilder));
 
-    Stream.of(OptionExtensionType.values())
-        .filter(extensions::containsKey)
-        .map(extensions::get)
-        .flatMap(List::stream)
-        .forEach(extension -> extension.extend(optionsBuilder));
+//    Stream.of(OptionExtensionType.values())
+//        .filter(extensions::containsKey)
+//        .map(extensions::get)
+//        .flatMap(List::stream)
+//        .forEach(extension -> extension.extend(optionsBuilder));
   }
 
 }

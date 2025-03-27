@@ -17,7 +17,7 @@ public abstract class AbstractOptionsValidator extends AbstractOptionsExtension 
     super(OptionExtensionType.VALIDATION, declaringClass);
   }
 
-  protected abstract Set<ConstraintViolation<OptionsBuilder<?, ?>>> validate(
+  public abstract Set<ConstraintViolation<OptionsBuilder<?, ?>>> validate(
       OptionsBuilder<?, ?> options);
 
   @Override

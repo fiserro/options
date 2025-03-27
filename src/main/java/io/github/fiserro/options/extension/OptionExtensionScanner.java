@@ -1,6 +1,7 @@
 package io.github.fiserro.options.extension;
 
 import io.github.fiserro.options.OptionsException;
+import io.github.fiserro.options.extension.validation.AbstractOptionsValidator;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +72,12 @@ public class OptionExtensionScanner {
       Class<? extends OptionsExtension> extensionClass) {
     Constructor<? extends OptionsExtension> constructor = extensionClass.getDeclaredConstructor(
         Class.class);
-    return constructor.newInstance(optionsClass);
+    OptionsExtension extension = constructor.newInstance(optionsClass);
+    if (extension.type() == OptionExtensionType.VALIDATION &&
+        !AbstractOptionsValidator.class.isAssignableFrom(extensionClass)) {
+      throw new IllegalExtensionException("Validation extension must extend AbstractOptionsValidator");
+    }
+    return extension;
   }
 
   @StandardException

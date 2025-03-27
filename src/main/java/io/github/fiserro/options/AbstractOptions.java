@@ -76,14 +76,14 @@ public abstract class AbstractOptions<T extends AbstractOptions<T>> implements O
 
   @Override
   public Set<ConstraintViolation<T>> validate() {
-    // TODO
-    return Set.of();
+    OptionsBuilder builder = toBuilder();
+    return OptionsFactory.validate(builder);
   }
 
   @Override
   public boolean isValid() {
-    // TODO
-    return false;
+    Set<ConstraintViolation<T>> validate = validate();
+    return validate.isEmpty();
   }
 
   @Override
