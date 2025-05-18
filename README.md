@@ -94,7 +94,19 @@ MyConfig config = OptionsFactory.create(MyConfig.class, Map.of(
 ));
 ```
 
+## Validation
 
+You can validate your options fluently after creating the instance. If the validation fails, a ValidateOptionsException will be thrown.
+```java
+MyConfig config = OptionsFactory.create(MyConfig.class, args)
+        .validated();
+```
+
+Or you can get a ConstraintViolation object with the validation error message and the path to the option that failed validation.
+```java
+MyConfig config = OptionsFactory.create(MyConfig.class, args);
+List<ConstraintViolation<MyConfig>> violations = config.validate();
+```
 
 ### Supported Jakarta Validations
 
@@ -127,7 +139,7 @@ public interface MyConfig extends JakartaValidatedOptions {
 }
 ```
 
-### Inheritance
+## Inheritance
 
 Options interfaces can inherit from multiple interfaces. 
 Be aware that only the last interface in the inheritance chain can expose the fluent `Options` interface. 
@@ -203,7 +215,7 @@ ApplicationConfig config = OptionsFactory.create(ApplicationConfig.class, Map.of
 ```
 
 
-### Composition
+## Composition
 
 Options interfaces can be composed using nested configurations. Here's an example:
 
@@ -245,11 +257,11 @@ public static void main(String[] args) {
 }
 ```
 
-### Adding Custom Extensions
+## Adding Custom Extensions
 Just create a class that implements the `OptionsExtension` interface and add it to the `@OptionsExtensions` annotation.
 You can load values from database or any other source. You can also add custom validation logic.
 
-### Adding bussiness logic to options
+## Adding bussiness logic to options
 You can add methods to your options interfaces. These methods can depend on other options or can be used to calculate values based on other options.
 It may be useful when you have a hundreds of microservices and you don't want to duplicate the same logic in each service.
 
@@ -286,7 +298,7 @@ public interface AppOptions extends Options<AppOptions> {
 }
 ```
 
-### Changing values at runtime
+## Changing values at runtime
 The instance of the options interface is immutable. If you need to change some values at runtime, you have to create a new instance of the options.
 You can use the `toBuilder()` method to create a new instance of the options with the same values as the original instance.
 Then you can change the values you need and create a new instance of the options.
@@ -343,7 +355,7 @@ Add the dependency to your Maven project:
 <dependency>
     <groupId>io.github.fiserro</groupId>
     <artifactId>options</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.3</version>
 </dependency>
 ```
 
