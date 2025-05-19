@@ -58,11 +58,14 @@ public abstract class OptionsExtensionSettingValues extends AbstractOptionsExten
       }
     } else {
       Object previousStateValue = tryGetValue(optionsBuilder, key);
+      if (optionsBuilder.values().get(optionDef) != null) {
+        // if the value is already set, it means that the value is not changed
+        return;
+      }
       optionsBuilder.setValue(optionDef.name(), value);
       Object currentStateValue = tryGetValue(optionsBuilder, key);
       if (!Objects.equals(previousStateValue, currentStateValue)) {
-        log.info("'{}' option is set to '{}' from {} '{}'", optionDef.name(), value, sourceType,
-            sourceName);
+        log.info("'{}' option is set to '{}' from {} '{}'", optionDef.name(), value, sourceType, sourceName);
       }
     }
   }
