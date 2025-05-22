@@ -3,6 +3,11 @@
 
 A type-safe configuration library for Java that supports validation using Jakarta Bean Validation.
 
+## When to use it
+Compared to a simple POJO holding configuration values, this library provides a possibility to inherit configuration options from multiple interfaces.
+This library is useful when you need to load configuration from different sources (environment variables, command line arguments, etc.) and want to validate the configuration using Jakarta Bean Validation. It provides a type-safe way to define your configuration options and supports default values, collections, enums, and more.
+It is also useful when you have a large number of microservices and want to avoid duplicating the same configuration logic in each service. You can define your configuration options in a single interface and inherit them in your microservices.
+
 ## Features
 
 | Feature                                       | Status |
@@ -355,7 +360,7 @@ Add the dependency to your Maven project:
 <dependency>
     <groupId>io.github.fiserro</groupId>
     <artifactId>options</artifactId>
-    <version>0.0.3</version>
+    <version>1.0.0-alpha1</version>
 </dependency>
 ```
 
