@@ -17,6 +17,7 @@ enum OptionExtensionType {
   LOAD_FROM_DB(true),
   LOAD_FROM_ENV(true),
   LOAD_FROM_ARGS(true),
+  CUSTOM(false),
   VALIDATION(false);
   private final boolean exclusive;
 }

@@ -1,5 +1,6 @@
 package io.github.fiserro.options;
 
+import io.github.fiserro.options.extension.OptionsExtension;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +25,7 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
   private final Set<OptionDef> optionDefs;
   private final Map<OptionDef, Object> values;
   private final String[] args;
+  private final List<OptionsExtension> dynamicExtensions;
 
   /**
    * Creates the options builder from the given Options Class, values and program arguments.
@@ -38,7 +40,25 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
   public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
       Class<T> optionsClass, Collection<OptionDef> optionDefs, Map<OptionDef, Object> values) {
     Map<OptionDef, Object> valuesCopy = deepCopyMap(values);
-    return new OptionsBuilder<>(optionsClass, optionDefs, valuesCopy);
+    return new OptionsBuilder<>(optionsClass, optionDefs, valuesCopy, List.of());
+  }
+
+  /**
+   * Creates the options builder from the given Options Class, values, dynamic extensions, and program arguments.
+   *
+   * @param optionsClass       the class of the options
+   * @param optionDefs         the options definition
+   * @param values             the values of the options
+   * @param dynamicExtensions  the dynamic extensions to apply
+   * @param <T>                the type of the options
+   * @param <B>                the type of the builder
+   * @return the options builder
+   */
+  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
+      Class<T> optionsClass, Collection<OptionDef> optionDefs, Map<OptionDef, Object> values,
+      List<OptionsExtension> dynamicExtensions) {
+    Map<OptionDef, Object> valuesCopy = deepCopyMap(values);
+    return new OptionsBuilder<>(optionsClass, optionDefs, valuesCopy, dynamicExtensions);
   }
 
   /**
@@ -52,9 +72,26 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
    */
   public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
       Class<T> optionsClass, Map<String, Object> values, String... args) {
+    return newBuilder(optionsClass, values, List.of(), args);
+  }
+
+  /**
+   * Creates the options builder from the given Options Class, values, dynamic extensions, and program arguments.
+   *
+   * @param optionsClass       the class of the options
+   * @param values             the values of the options
+   * @param dynamicExtensions  the dynamic extensions to apply
+   * @param args               the program arguments
+   * @param <T>                the type of the options
+   * @param <B>                the type of the builder
+   * @return the options builder
+   */
+  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
+      Class<T> optionsClass, Map<String, Object> values, List<OptionsExtension> dynamicExtensions,
+      String... args) {
     Map<String, Object> valuesCopy = deepCopyMap(values);
     Set<OptionDef> optionDefSet = new OptionScanner().scan(optionsClass);
-    return new OptionsBuilder<>(optionsClass, optionDefSet, valuesCopy, args);
+    return new OptionsBuilder<>(optionsClass, optionDefSet, valuesCopy, dynamicExtensions, args);
   }
 
   /**
@@ -93,32 +130,36 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
   /**
    * Creates the options builder from the given Options Class, values and program arguments.
    *
-   * @param optionsClass the class of the options
-   * @param optionDefs   the options definition
-   * @param values       the values of the options
+   * @param optionsClass       the class of the options
+   * @param optionDefs         the options definition
+   * @param values             the values of the options
+   * @param dynamicExtensions  the dynamic extensions to apply
    */
   private OptionsBuilder(Class<T> optionsClass, Collection<OptionDef> optionDefs,
-      Map<OptionDef, Object> values) {
+      Map<OptionDef, Object> values, List<OptionsExtension> dynamicExtensions) {
     this.optionsClass = optionsClass;
     this.optionDefs = new HashSet<>(optionDefs);
     this.values = values;
     this.args = new String[0];
+    this.dynamicExtensions = List.copyOf(dynamicExtensions);
   }
 
   /**
    * Creates the options builder from the given Options Class, values and program arguments.
    *
-   * @param optionsClass the class of the options
-   * @param optionDefs   the options definition
-   * @param values       the values of the options
-   * @param args         the program arguments
+   * @param optionsClass       the class of the options
+   * @param optionDefs         the options definition
+   * @param values             the values of the options
+   * @param dynamicExtensions  the dynamic extensions to apply
+   * @param args               the program arguments
    */
   private OptionsBuilder(Class<T> optionsClass, Set<OptionDef> optionDefs,
-      Map<String, Object> values, String... args) {
+      Map<String, Object> values, List<OptionsExtension> dynamicExtensions, String... args) {
     this.optionsClass = optionsClass;
     this.optionDefs = optionDefs;
     this.values = new HashMap<>();
     this.args = args;
+    this.dynamicExtensions = List.copyOf(dynamicExtensions);
 
     optionDefs.forEach(optionDef -> {
       Object value = values.get(optionDef.name());
@@ -128,7 +169,7 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
           value = new HashMap<>();
         }
         if (value instanceof Map<?, ?> map) {
-          this.values.put(optionDef, new OptionsBuilder(optionDef.classType(), optionDef.children(), map, args));
+          this.values.put(optionDef, new OptionsBuilder(optionDef.classType(), optionDef.children(), map, dynamicExtensions, args));
         } else {
           throw new IllegalArgumentException(
               "The nested values for '" + optionDef.path() + "' must be a Map");
@@ -305,6 +346,15 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
    */
   public String[] args() {
     return args;
+  }
+
+  /**
+   * Returns the dynamic extensions to be applied.
+   *
+   * @return the dynamic extensions
+   */
+  public List<OptionsExtension> dynamicExtensions() {
+    return dynamicExtensions;
   }
 
   /**

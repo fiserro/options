@@ -1,10 +1,12 @@
 package io.github.fiserro.options;
 
+import io.github.fiserro.options.extension.OptionsExtension;
 import io.github.fiserro.options.extension.validation.ValidateOptionsException;
 import jakarta.validation.ConstraintViolation;
 
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -26,6 +28,7 @@ public abstract class AbstractOptions<T extends AbstractOptions<T>> implements O
     private final Class<T> optionsClass;
     private final Map<OptionDef, Object> values;
     private final Map<String, OptionDef> options;
+    private final List<OptionsExtension> dynamicExtensions;
 
     @Override
     public Set<OptionDef> options() {
@@ -62,7 +65,7 @@ public abstract class AbstractOptions<T extends AbstractOptions<T>> implements O
 
     @Override
     public <B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> toBuilder(Class<T> optionsClass) {
-        return OptionsBuilder.newBuilder(optionsClass, options.values(), values);
+        return OptionsBuilder.newBuilder(optionsClass, options.values(), values, dynamicExtensions);
     }
 
     /**

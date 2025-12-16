@@ -50,6 +50,20 @@ public class OptionsFactory {
     }
 
     /**
+     * Creates the options instance with the given dynamic extensions and program arguments.
+     *
+     * @param optionsClass       the class of the options
+     * @param dynamicExtensions  the dynamic extensions to apply
+     * @param args               the program arguments
+     * @param <T>                the type of the options
+     * @return the options instance
+     */
+    public static <T extends Options<T>> T create(Class<T> optionsClass,
+            List<OptionsExtension> dynamicExtensions, String... args) {
+        return create(optionsClass, new HashMap<>(), dynamicExtensions, args);
+    }
+
+    /**
      * Creates the options instance with the given values and program arguments. You can prefill the
      * options with the values. Those value will have the lowest possible priority comparing to all
      * standard value-setting extensions. It means the prefill values will be overwritten by the
@@ -70,6 +84,28 @@ public class OptionsFactory {
     }
 
     /**
+     * Creates the options instance with the given values, dynamic extensions, and program arguments.
+     * You can prefill the options with the values. Those value will have the lowest possible priority
+     * comparing to all standard value-setting extensions. It means the prefill values will be
+     * overwritten by the values from any other source. Fill the values is the easiest way how to set
+     * the values of the options programmatically without setting the environment variables etc.
+     *
+     * @param optionsClass       the class of the options
+     * @param values             the values of the options
+     * @param dynamicExtensions  the dynamic extensions to apply
+     * @param args               the program arguments
+     * @param <T>                the type of the options
+     * @param <B>                the type of the builder
+     * @return the options instance
+     */
+    public static <T extends Options<T>, B extends OptionsBuilder<T, B>> T create(
+            Class<T> optionsClass, Map<String, Object> values, List<OptionsExtension> dynamicExtensions,
+            String... args) {
+        OptionsBuilder<T, B> optionsBuilder = newBuilder(optionsClass, values, dynamicExtensions, args);
+        return buildOptions(optionsBuilder);
+    }
+
+    /**
      * Creates the options builder from the given Options Class, values and program arguments.
      *
      * @param optionsClass the class of the options
@@ -82,6 +118,23 @@ public class OptionsFactory {
     public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
             Class<T> optionsClass, Map<String, Object> values, String... args) {
         return OptionsBuilder.newBuilder(optionsClass, values, args);
+    }
+
+    /**
+     * Creates the options builder from the given Options Class, values, dynamic extensions, and program arguments.
+     *
+     * @param optionsClass       the class of the options
+     * @param values             the values of the options
+     * @param dynamicExtensions  the dynamic extensions to apply
+     * @param args               the program arguments
+     * @param <T>                the type of the options
+     * @param <B>                the type of the builder
+     * @return the options builder
+     */
+    public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
+            Class<T> optionsClass, Map<String, Object> values, List<OptionsExtension> dynamicExtensions,
+            String... args) {
+        return OptionsBuilder.newBuilder(optionsClass, values, dynamicExtensions, args);
     }
 
     /**
@@ -136,10 +189,10 @@ public class OptionsFactory {
             Class<?> dynamicType = unloaded.load(Thread.currentThread().getContextClassLoader())
                     .getLoaded();
             Constructor<?> constructor = dynamicType.getDeclaredConstructor(Class.class, Map.class,
-                    Map.class);
+                    Map.class, List.class);
             //noinspection unchecked
             return (T) constructor.newInstance(optionsBuilder.optionsInterface(), optionsBuilder.values(),
-                    optionsBuilder.optionsByKey());
+                    optionsBuilder.optionsByKey(), optionsBuilder.dynamicExtensions());
         }
     }
 
@@ -202,14 +255,23 @@ public class OptionsFactory {
                 .map(e -> (OptionsBuilder<?, ?>) e.getValue())
                 .flatMap(subBuilder -> validate(options, subBuilder).stream());
 
-        Stream<ConstraintViolation<T>> violations = new OptionExtensionScanner().scan(
+        // Get annotation-based validation extensions
+        Stream<ConstraintViolation<T>> annotationViolations = new OptionExtensionScanner().scan(
                         builder.optionsInterface())
                 .getOrDefault(OptionExtensionType.VALIDATION, List.of())
                 .stream()
                 .map(e -> (AbstractOptionsValidator<T>) e)
                 .flatMap(e -> e.validate(options, builder).stream());
 
-        return Stream.concat(childrenViolations, violations)
+        // Get dynamic validation extensions
+        Stream<ConstraintViolation<T>> dynamicViolations = builder.dynamicExtensions().stream()
+                .filter(e -> e.type() == OptionExtensionType.VALIDATION)
+                .map(e -> (AbstractOptionsValidator<T>) e)
+                .flatMap(e -> e.validate(options, builder).stream());
+
+        return Stream.concat(
+                        childrenViolations,
+                        Stream.concat(annotationViolations, dynamicViolations))
                 .collect(Collectors.toSet());
     }
 
@@ -221,14 +283,45 @@ public class OptionsFactory {
     private static <T extends Options<T>, B extends OptionsBuilder<T, B>> void applyExtensions(
             OptionsBuilder<T, B> optionsBuilder) {
         OptionExtensionScanner scanner = new OptionExtensionScanner();
-        Map<OptionExtensionType, List<OptionsExtension>> extensions = scanner.scan(
+        Map<OptionExtensionType, List<OptionsExtension>> annotationExtensions = scanner.scan(
                 optionsBuilder.optionsInterface());
 
+        // Merge dynamic extensions with annotation-based extensions
+        Map<OptionExtensionType, List<OptionsExtension>> allExtensions = new TreeMap<>(annotationExtensions);
+
+        for (OptionsExtension dynamicExt : optionsBuilder.dynamicExtensions()) {
+            OptionExtensionType type = dynamicExt.type();
+            List<OptionsExtension> existing = allExtensions.computeIfAbsent(type, k -> new ArrayList<>());
+
+            // Validate exclusivity: cannot mix annotation-based and dynamic extensions of the same exclusive type
+            if (type.exclusive() && !existing.isEmpty()) {
+                throw new OptionExtensionScanner.IllegalExtensionException(
+                        "Cannot add dynamic extension of exclusive type " + type +
+                                " when annotation-based extension already exists for interface " +
+                                optionsBuilder.optionsInterface().getSimpleName());
+            }
+
+            existing.add(dynamicExt);
+        }
+
+        // Validate no duplicate exclusive types in dynamic extensions
+        optionsBuilder.dynamicExtensions().stream()
+                .filter(e -> e.type().exclusive())
+                .collect(Collectors.groupingBy(OptionsExtension::type))
+                .forEach((type, list) -> {
+                    if (list.size() > 1) {
+                        throw new OptionExtensionScanner.IllegalExtensionException(
+                                "Multiple dynamic extensions of exclusive type " + type +
+                                        " for interface " + optionsBuilder.optionsInterface().getSimpleName());
+                    }
+                });
+
+        // Apply extensions in reverse order (highest priority last)
         Stream.of(OptionExtensionType.values())
                 .sorted(Comparator.reverseOrder())
-                .filter(extensions::containsKey)
+                .filter(allExtensions::containsKey)
                 .filter(type -> type != OptionExtensionType.VALIDATION)
-                .map(extensions::get)
+                .map(allExtensions::get)
                 .flatMap(List::stream)
                 .forEach(extension -> extension.extend(optionsBuilder));
     }
