@@ -1,7 +1,6 @@
 package io.github.fiserro.options.extension.validation;
 
 import io.github.fiserro.options.Options;
-import io.github.fiserro.options.OptionsBuilder;
 import io.github.fiserro.options.OptionsException;
 import jakarta.validation.ConstraintViolation;
 

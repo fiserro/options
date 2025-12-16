@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.ByteBuddy;
@@ -74,13 +75,11 @@ public class OptionsFactory {
      * @param values       the values of the options
      * @param args         the program arguments
      * @param <T>          the type of the options
-     * @param <B>          the type of the builder
      * @return the options instance
      */
-    public static <T extends Options<T>, B extends OptionsBuilder<T, B>> T create(
+    public static <T extends Options<T>> T create(
             Class<T> optionsClass, Map<String, Object> values, String... args) {
-        OptionsBuilder<T, B> optionsBuilder = newBuilder(optionsClass, values, args);
-        return buildOptions(optionsBuilder);
+        return create(optionsClass, values, Collections.emptyList(), args);
     }
 
     /**
@@ -95,46 +94,14 @@ public class OptionsFactory {
      * @param dynamicExtensions  the dynamic extensions to apply
      * @param args               the program arguments
      * @param <T>                the type of the options
-     * @param <B>                the type of the builder
      * @return the options instance
      */
-    public static <T extends Options<T>, B extends OptionsBuilder<T, B>> T create(
-            Class<T> optionsClass, Map<String, Object> values, List<OptionsExtension> dynamicExtensions,
+    @lombok.Builder(builderClassName = "$OptionsBuilder")
+    public static <T extends Options<T>> T create(
+            Class<T> optionsClass, @Singular Map<String, Object> values, @Singular List<OptionsExtension> dynamicExtensions,
             String... args) {
-        OptionsBuilder<T, B> optionsBuilder = newBuilder(optionsClass, values, dynamicExtensions, args);
+        OptionsBuilder<T, ?> optionsBuilder = OptionsBuilder.newBuilder(optionsClass, values, dynamicExtensions, args);
         return buildOptions(optionsBuilder);
-    }
-
-    /**
-     * Creates the options builder from the given Options Class, values and program arguments.
-     *
-     * @param optionsClass the class of the options
-     * @param values       the values of the options
-     * @param args         the program arguments
-     * @param <T>          the type of the options
-     * @param <B>          the type of the builder
-     * @return the options builder
-     */
-    public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
-            Class<T> optionsClass, Map<String, Object> values, String... args) {
-        return OptionsBuilder.newBuilder(optionsClass, values, args);
-    }
-
-    /**
-     * Creates the options builder from the given Options Class, values, dynamic extensions, and program arguments.
-     *
-     * @param optionsClass       the class of the options
-     * @param values             the values of the options
-     * @param dynamicExtensions  the dynamic extensions to apply
-     * @param args               the program arguments
-     * @param <T>                the type of the options
-     * @param <B>                the type of the builder
-     * @return the options builder
-     */
-    public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
-            Class<T> optionsClass, Map<String, Object> values, List<OptionsExtension> dynamicExtensions,
-            String... args) {
-        return OptionsBuilder.newBuilder(optionsClass, values, dynamicExtensions, args);
     }
 
     /**
@@ -147,7 +114,7 @@ public class OptionsFactory {
      * @return the options builder
      */
     @SneakyThrows
-    public static <T extends Options<T>, B extends OptionsBuilder<T, B>> T buildOptions(
+    static <T extends Options<T>, B extends OptionsBuilder<T, B>> T buildOptions(
             OptionsBuilder<T, B> optionsBuilder) {
 
         applyExtensions(optionsBuilder);
@@ -226,7 +193,7 @@ public class OptionsFactory {
      * @return the cloned options instance
      */
     @SneakyThrows
-    public static <T extends Options<T>, B extends OptionsBuilder<T, B>> T clone(T options) {
+    public static <T extends Options<T>> T clone(T options) {
         return options.toBuilder().build();
     }
 
@@ -235,9 +202,9 @@ public class OptionsFactory {
      *
      * @param options the options to be validated
      */
-    public static <T extends Options<T>, B extends OptionsBuilder<T, B>> Set<ConstraintViolation<T>> validate(
+    public static <T extends Options<T>> Set<ConstraintViolation<T>> validate(
             Options<T> options) {
-        OptionsBuilder<T, B> builder = options.toBuilder();
+        OptionsBuilder<T, ?> builder = options.toBuilder();
         return validate(options, builder);
     }
 

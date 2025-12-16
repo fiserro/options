@@ -128,12 +128,13 @@ class GeneralOptionsTest {
 
   private class OptionsTestHelper {
 
-    private final OptionsBuilder<?, ?> optionsBuilder;
+    private final OptionsFactory.$OptionsBuilder<?> optionsBuilder;
     private final Map<String, OptionDef> optionsByName;
 
-    private <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsTestHelper(Class<T> optionsClass) {
+    private <T extends Options<T>> OptionsTestHelper(Class<T> optionsClass) {
 
-      optionsBuilder = OptionsFactory.newBuilder(optionsClass, new HashMap<>());
+      optionsBuilder = OptionsFactory.<T>builder()
+              .optionsClass(optionsClass);
       optionsByName = new OptionScanner().scanByName(optionsClass);
     }
 
@@ -141,7 +142,7 @@ class GeneralOptionsTest {
       List<Arguments> arguments = optionsByName.values().stream()
           .map(option -> {
             Pair<String, Object> valuePair = getValuePair(option);
-            optionsBuilder.setValue(option.name(), valuePair.getValue());
+            optionsBuilder.value(option.name(), valuePair.getValue());
             return Arguments.of(valuePair.getKey(), valuePair.getValue(), option, optionsBuilder);
           })
           .toList();
