@@ -28,22 +28,6 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
   private final List<OptionsExtension> dynamicExtensions;
 
   /**
-   * Creates the options builder from the given Options Class, values and program arguments.
-   *
-   * @param optionsClass the class of the options
-   * @param optionDefs   the options definition
-   * @param values       the values of the options
-   * @param <T>          the type of the options
-   * @param <B>          the type of the builder
-   * @return the options builder
-   */
-  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
-      Class<T> optionsClass, Collection<OptionDef> optionDefs, Map<OptionDef, Object> values) {
-    Map<OptionDef, Object> valuesCopy = deepCopyMap(values);
-    return new OptionsBuilder<>(optionsClass, optionDefs, valuesCopy, List.of());
-  }
-
-  /**
    * Creates the options builder from the given Options Class, values, dynamic extensions, and program arguments.
    *
    * @param optionsClass       the class of the options
@@ -54,25 +38,11 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
    * @param <B>                the type of the builder
    * @return the options builder
    */
-  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
+  static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
       Class<T> optionsClass, Collection<OptionDef> optionDefs, Map<OptionDef, Object> values,
       List<OptionsExtension> dynamicExtensions) {
     Map<OptionDef, Object> valuesCopy = deepCopyMap(values);
     return new OptionsBuilder<>(optionsClass, optionDefs, valuesCopy, dynamicExtensions);
-  }
-
-  /**
-   * Creates the options builder from the given Options Class, values and program arguments.
-   *
-   * @param optionsClass the class of the options
-   * @param values       the values of the options
-   * @param <T>          the type of the options
-   * @param <B>          the type of the builder
-   * @return the options builder
-   */
-  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
-      Class<T> optionsClass, Map<String, Object> values, String... args) {
-    return newBuilder(optionsClass, values, List.of(), args);
   }
 
   /**
@@ -86,7 +56,7 @@ public class OptionsBuilder<T extends Options<T>, B extends OptionsBuilder<T, B>
    * @param <B>                the type of the builder
    * @return the options builder
    */
-  public static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
+  static <T extends Options<T>, B extends OptionsBuilder<T, B>> OptionsBuilder<T, B> newBuilder(
       Class<T> optionsClass, Map<String, Object> values, List<OptionsExtension> dynamicExtensions,
       String... args) {
     Map<String, Object> valuesCopy = deepCopyMap(values);
