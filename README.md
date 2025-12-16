@@ -263,8 +263,72 @@ public static void main(String[] args) {
 ```
 
 ## Adding Custom Extensions
-Just create a class that implements the `OptionsExtension` interface and add it to the `@OptionsExtensions` annotation.
-You can load values from database or any other source. You can also add custom validation logic.
+
+You can create custom extensions to load configuration from any source (database, remote API, etc.).
+
+### Static Extension Registration
+Add extensions to your interface using the `@OptionsExtensions` annotation:
+
+```java
+@OptionsExtensions({DatabaseLoader.class, EnvironmentVariables.class})
+public interface MyConfig extends Options<MyConfig> {
+    @Option
+    String databaseUrl();
+}
+```
+
+### Dynamic Extension Registration
+For extensions that require runtime context (database connections, API clients, etc.), pass them directly to the factory:
+
+```java
+// Create custom extension with database context
+public class DatabaseConfigExtension extends AbstractOptionsExtension {
+    private final Database db;
+
+    public DatabaseConfigExtension(Class<? extends Options<?>> declaringClass, Database db) {
+        super(OptionExtensionType.CUSTOM, declaringClass);
+        this.db = db;
+    }
+
+    @Override
+    public void extend(OptionsBuilder<?, ?> builder) {
+        // Load configuration from database
+        Map<String, String> configs = db.getConfigurations();
+        configs.forEach(builder::setValue);
+    }
+}
+
+// Use the extension
+Database db = connectToDatabase();
+MyConfig config = OptionsFactory.create(
+    MyConfig.class,
+    List.of(new DatabaseConfigExtension(MyConfig.class, db)),
+    args
+);
+```
+
+### Fluent Builder API
+For more control, use the fluent builder pattern:
+
+```java
+MyConfig config = OptionsFactory.builder()
+        .optionsClass(MyConfig.class)
+        .dynamicExtension(new DatabaseExtension(MyConfig.class, db))
+        .dynamicExtension(new ApiExtension(MyConfig.class, apiClient))
+        .value("fallbackUrl", "http://localhost")
+        .value("port", 1883)
+        .build()
+        .validated();
+```
+
+**Extension Priority** (from lowest to highest):
+- `CUSTOM` - Custom extensions (applied first, can be overridden)
+- `LOAD_FROM_FILE` - File-based configuration
+- `LOAD_FROM_DB` - Database configuration
+- `LOAD_FROM_ENV` - Environment variables
+- `LOAD_FROM_ARGS` - Command-line arguments (highest priority)
+
+**Note:** Exclusive extension types (`LOAD_FROM_FILE`, `LOAD_FROM_DB`, `LOAD_FROM_ENV`, `LOAD_FROM_ARGS`) can only have one extension per type. Non-exclusive types (`CUSTOM`, `VALIDATION`) allow multiple extensions.
 
 ## Adding bussiness logic to options
 You can add methods to your options interfaces. These methods can depend on other options or can be used to calculate values based on other options.
