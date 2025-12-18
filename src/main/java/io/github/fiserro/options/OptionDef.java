@@ -1,9 +1,11 @@
 package io.github.fiserro.options;
 
 import com.google.common.base.CaseFormat;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,7 +25,8 @@ public record OptionDef(
     Set<String> keys,
     OptionPath path,
     OptionDef parent,
-    Set<OptionDef> children
+    Set<OptionDef> children,
+    List<Annotation> annotations
 ) {
 
   /**

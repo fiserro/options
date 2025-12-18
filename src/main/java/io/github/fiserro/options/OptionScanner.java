@@ -77,6 +77,7 @@ public class OptionScanner {
         .wither(wither)
         .path(path)
         .children(children)
+        .annotations(Stream.of(getter.getAnnotations()).toList())
         .build();
   }
 
@@ -116,6 +117,9 @@ public class OptionScanner {
           }
           return a.toBuilder()
               .keys(Stream.concat(a.keys().stream(), b.keys().stream()).collect(Collectors.toSet()))
+              .annotations(Stream.concat(a.annotations().stream(), b.annotations().stream())
+                  .distinct()
+                  .toList())
               .build();
         }));
 
