@@ -31,7 +31,7 @@ It is also useful when you have a large number of microservices and want to avoi
 | Load from HashMap                             | ✅ |
 | Load from properties file                     | ❌ |
 | Load from database                            | ❌ |
-| Load from .env file                           | ❌ |
+| Load from .env file                           | ✅ |
 | Load from JSON file                           | ❌ |
 | Load from XML file                            | ❌ |
 
@@ -98,6 +98,58 @@ MyConfig config = OptionsFactory.create(MyConfig.class, Map.of(
     "serviceUrl", "http://example.com"
 ));
 ```
+
+### Load from .env file
+
+You can load configuration from a `.env` file by adding `EnvironmentFile` extension to the `@OptionsExtensions` annotation:
+
+```java
+@OptionsExtensions({EnvironmentFile.class})
+public interface MyConfig extends Options<MyConfig> {
+    @Option
+    String serviceUrl();
+
+    @Option
+    int port();
+}
+```
+
+The `.env` file format is one variable per line:
+```
+SERVICE_URL=http://example.com
+PORT=8080
+# Comments are supported
+```
+
+By default, the extension looks for a `.env` file in the current directory. You can override the file path using:
+- Program argument: `--envFile=/path/to/custom.env`
+- Environment variable: `ENV_FILE=/path/to/custom.env`
+
+```java
+// Using default .env file
+MyConfig config = OptionsFactory.create(MyConfig.class);
+
+// Using custom file path via argument
+MyConfig config = OptionsFactory.create(MyConfig.class, "--envFile=/etc/myapp/config.env");
+```
+
+You can also pass the extension as an instance to `OptionsFactory.create()`:
+
+```java
+public interface MyConfig extends Options<MyConfig> {
+    @Option
+    String serviceUrl();
+}
+
+// Pass extension instance directly
+MyConfig config = OptionsFactory.create(
+    MyConfig.class,
+    List.of(new EnvironmentFile(MyConfig.class)),
+    args
+);
+```
+
+**Note:** Environment variables and command-line arguments take precedence over values loaded from the `.env` file.
 
 ## Validation
 
@@ -424,7 +476,7 @@ Add the dependency to your Maven project:
 <dependency>
     <groupId>io.github.fiserro</groupId>
     <artifactId>options</artifactId>
-    <version>1.0.0-alpha1</version>
+    <version>1.0.0-rc2</version>
 </dependency>
 ```
 
