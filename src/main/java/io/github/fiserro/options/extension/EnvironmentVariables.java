@@ -1,6 +1,5 @@
 package io.github.fiserro.options.extension;
 
-import io.github.fiserro.options.Options;
 import io.github.fiserro.options.OptionsBuilder;
 
 /**
@@ -9,8 +8,8 @@ import io.github.fiserro.options.OptionsBuilder;
  */
 public class EnvironmentVariables extends OptionsExtensionSettingValues {
 
-  public EnvironmentVariables(Class<? extends Options<?>> declaringClass) {
-    super("environment variable", OptionExtensionType.LOAD_FROM_ENV, declaringClass);
+  public EnvironmentVariables() {
+    super("environment variable", OptionExtensionType.LOAD_FROM_ENV);
   }
 
   @Override

@@ -31,11 +31,4 @@ public interface OptionsExtension {
    * @return the type of the extension
    */
   OptionExtensionType type();
-
-  /**
-   * Returns the class that declares the extension.
-   *
-   * @return the class that declares the extension
-   */
-  Class<? extends Options<?>> declaringClass();
 }

@@ -23,10 +23,6 @@ public class JakartaValidator<T extends Options<T>> extends AbstractOptionsValid
 
   private final JakartaValidatorResolver validatorResolver = new HibernateValidatorResolver();
 
-  public JakartaValidator(Class<? extends Options<?>> declaringClass) {
-    super(declaringClass);
-  }
-
   @Override
   public Set<ConstraintViolation<T>> validate(Options<T> options, OptionsBuilder<?, ?> builder) {
     return builder.options().stream()

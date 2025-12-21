@@ -153,7 +153,10 @@ public class OptionsFactory {
         }
 
         try (Unloaded<?> unloaded = builder.make()) {
-            Class<?> dynamicType = unloaded.load(Thread.currentThread().getContextClassLoader())
+            // Use the classloader of the options interface to avoid ClassCastException
+            // when the interface is loaded by a different classloader (e.g., OpenHAB scripts)
+            ClassLoader classLoader = optionsBuilder.optionsInterface().getClassLoader();
+            Class<?> dynamicType = unloaded.load(classLoader)
                     .getLoaded();
             Constructor<?> constructor = dynamicType.getDeclaredConstructor(Class.class, Map.class,
                     Map.class, List.class);

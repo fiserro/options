@@ -1,6 +1,5 @@
 package io.github.fiserro.options.extension;
 
-import io.github.fiserro.options.Options;
 import io.github.fiserro.options.OptionsBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,8 +27,8 @@ public class EnvironmentFile extends OptionsExtensionSettingValues {
   private static final String ENV_FILE_ARG_PREFIX = "--envFile=";
   private static final String ENV_FILE_VAR = "ENV_FILE";
 
-  public EnvironmentFile(Class<? extends Options<?>> declaringClass) {
-    super("environment variable file", OptionExtensionType.LOAD_FROM_FILE, declaringClass);
+  public EnvironmentFile() {
+    super("environment variable file", OptionExtensionType.LOAD_FROM_FILE);
   }
 
   @Override

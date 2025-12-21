@@ -337,8 +337,8 @@ For extensions that require runtime context (database connections, API clients, 
 public class DatabaseConfigExtension extends AbstractOptionsExtension {
     private final Database db;
 
-    public DatabaseConfigExtension(Class<? extends Options<?>> declaringClass, Database db) {
-        super(OptionExtensionType.CUSTOM, declaringClass);
+    public DatabaseConfigExtension(Database db) {
+        super(OptionExtensionType.CUSTOM);
         this.db = db;
     }
 
@@ -354,7 +354,7 @@ public class DatabaseConfigExtension extends AbstractOptionsExtension {
 Database db = connectToDatabase();
 MyConfig config = OptionsFactory.create(
     MyConfig.class,
-    List.of(new DatabaseConfigExtension(MyConfig.class, db)),
+    List.of(new DatabaseConfigExtension(db)),
     args
 );
 ```

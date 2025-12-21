@@ -76,21 +76,21 @@ Extensions are applied during the build phase to load values from different sour
 5. **Application**: Each extension's `extend(OptionsBuilder)` method is called to populate values
 6. **Validation**: Validation extensions run separately after the instance is created
 
-**Extension Priority (reverse order application)**:
-- `LOAD_FROM_FILE` (highest priority - applied last)
-- `LOAD_FROM_DB`
-- `LOAD_FROM_ENV`
-- `LOAD_FROM_ARGS`
-- `CUSTOM` (lowest priority - applied first, allows others to override)
+**Extension Priority (lowest to highest - higher priority overrides lower)**:
+- `CUSTOM` (lowest priority - applied first, can be overridden by others)
+- `LOAD_FROM_FILE` - File-based configuration (`.env` files)
+- `LOAD_FROM_DB` - Database configuration
+- `LOAD_FROM_ENV` - Environment variables
+- `LOAD_FROM_ARGS` (highest priority - applied last, overrides all others)
 - `VALIDATION` (special - only runs during validation, not during build)
 
 **OptionsExtension Interface** (`src/main/java/io/github/fiserro/options/extension/OptionsExtension.java`)
 - All extensions implement this interface
 - `extend(OptionsBuilder)` - called to populate values
 - `type()` - returns extension type/priority
-- `declaringClass()` - returns the options interface class
 - Built-in extensions in `src/main/java/io/github/fiserro/options/extension/`:
   - `EnvironmentVariables` - loads from environment variables (converts to UPPER_SNAKE_CASE)
+  - `EnvironmentFile` - loads from `.env` files (uses `EnvironmentVariableLoader` shared utility)
   - `ArgumentsEquals` - parses `--key=value` arguments
   - `ArgumentsSpace` - parses `--key value` arguments
   - `JakartaValidator` - validates using Jakarta Bean Validation annotations
@@ -103,8 +103,8 @@ Dynamic extensions allow passing extension instances with runtime context (datab
 public class DatabaseExtension extends AbstractOptionsExtension {
     private final Database db;
 
-    public DatabaseExtension(Class<? extends Options<?>> declaringClass, Database db) {
-        super(OptionExtensionType.CUSTOM, declaringClass);
+    public DatabaseExtension(Database db) {
+        super(OptionExtensionType.CUSTOM);
         this.db = db;
     }
 
@@ -119,7 +119,7 @@ public class DatabaseExtension extends AbstractOptionsExtension {
 Database db = new Database();
 MyOptions options = OptionsFactory.create(
     MyOptions.class,
-    List.of(new DatabaseExtension(MyOptions.class, db)),
+    List.of(new DatabaseExtension(db)),
     args);
 ```
 

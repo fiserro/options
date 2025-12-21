@@ -53,9 +53,8 @@ public class DynamicExtensionsTest {
 
         private final Map<String, String> database;
 
-        public DatabaseSimulatorExtension(Class<? extends Options<?>> declaringClass,
-                                          Map<String, String> database) {
-            super(OptionExtensionType.CUSTOM, declaringClass);
+        public DatabaseSimulatorExtension(Map<String, String> database) {
+            super(OptionExtensionType.CUSTOM);
             this.database = database;
         }
 
@@ -72,8 +71,7 @@ public class DynamicExtensionsTest {
         database.put("name", "John");
         database.put("value", "Test Value");
 
-        DatabaseSimulatorExtension extension = new DatabaseSimulatorExtension(
-                TestOptions.class, database);
+        DatabaseSimulatorExtension extension = new DatabaseSimulatorExtension(database);
 
         // Create options with dynamic extension
         TestOptions options = OptionsFactory.create(
@@ -90,8 +88,7 @@ public class DynamicExtensionsTest {
         Map<String, String> database = new HashMap<>();
         database.put("name", "Dynamic Value");
 
-        DatabaseSimulatorExtension extension = new DatabaseSimulatorExtension(
-                TestOptions.class, database);
+        DatabaseSimulatorExtension extension = new DatabaseSimulatorExtension(database);
 
         // Prefilled values have lowest priority
         Map<String, Object> prefilled = Map.of("name", "Prefilled Value");
@@ -108,7 +105,7 @@ public class DynamicExtensionsTest {
     @Test
     void exclusivityValidationThrowsWhenConflicting() {
         // Create a dynamic extension with exclusive type
-        OptionsExtension dynamicArgsExtension = new ArgumentsEquals(AnnotatedOptions.class);
+        OptionsExtension dynamicArgsExtension = new ArgumentsEquals();
 
         // Should throw because AnnotatedOptions already has ArgumentsEquals via annotation
         var exception = assertThrows(
@@ -124,8 +121,8 @@ public class DynamicExtensionsTest {
     @Test
     void multipleDynamicExclusiveExtensionsThrowError() {
         // Create two dynamic extensions of the same exclusive type
-        OptionsExtension ext1 = new ArgumentsEquals(TestOptions.class);
-        OptionsExtension ext2 = new ArgumentsSpace(TestOptions.class);
+        OptionsExtension ext1 = new ArgumentsEquals();
+        OptionsExtension ext2 = new ArgumentsSpace();
 
         // Should throw because both are LOAD_FROM_ARGS type (exclusive)
         var exception = assertThrows(
@@ -143,8 +140,7 @@ public class DynamicExtensionsTest {
         Map<String, String> database = new HashMap<>();
         database.put("name", "Original");
 
-        DatabaseSimulatorExtension extension = new DatabaseSimulatorExtension(
-                TestOptions.class, database);
+        DatabaseSimulatorExtension extension = new DatabaseSimulatorExtension(database);
 
         TestOptions original = OptionsFactory.create(
                 TestOptions.class,
@@ -167,8 +163,7 @@ public class DynamicExtensionsTest {
         Map<String, String> database = new HashMap<>();
         database.put("name", "Dynamic Only");
 
-        DatabaseSimulatorExtension extension = new DatabaseSimulatorExtension(
-                TestOptions.class, database);
+        DatabaseSimulatorExtension extension = new DatabaseSimulatorExtension(database);
 
         TestOptions options = OptionsFactory.create(
                 TestOptions.class,
@@ -190,8 +185,8 @@ public class DynamicExtensionsTest {
         Map<String, String> db2 = new HashMap<>();
         db2.put("value", "From DB2");
 
-        DatabaseSimulatorExtension ext1 = new DatabaseSimulatorExtension(TestOptions.class, db1);
-        DatabaseSimulatorExtension ext2 = new DatabaseSimulatorExtension(TestOptions.class, db2);
+        DatabaseSimulatorExtension ext1 = new DatabaseSimulatorExtension(db1);
+        DatabaseSimulatorExtension ext2 = new DatabaseSimulatorExtension(db2);
 
         TestOptions options = OptionsFactory.create(
                 TestOptions.class,
@@ -209,8 +204,7 @@ public class DynamicExtensionsTest {
         database.put("value", "From Database");
 
         // Use TestOptions (no annotations) with dynamic database extension
-        DatabaseSimulatorExtension dbExtension = new DatabaseSimulatorExtension(
-                TestOptions.class, database);
+        DatabaseSimulatorExtension dbExtension = new DatabaseSimulatorExtension(database);
 
         TestOptions options = OptionsFactory.create(
                 TestOptions.class,
@@ -226,8 +220,7 @@ public class DynamicExtensionsTest {
         Map<String, String> database = new HashMap<>();
         database.put("name", "Original");
 
-        DatabaseSimulatorExtension extension = new DatabaseSimulatorExtension(
-                TestOptions.class, database);
+        DatabaseSimulatorExtension extension = new DatabaseSimulatorExtension(database);
 
         TestOptions original = OptionsFactory.create(
                 TestOptions.class,

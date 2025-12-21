@@ -1,6 +1,5 @@
 package io.github.fiserro.options.extension;
 
-import io.github.fiserro.options.Options;
 import io.github.fiserro.options.OptionsBuilder;
 
 /**
@@ -9,8 +8,8 @@ import io.github.fiserro.options.OptionsBuilder;
  */
 public class ArgumentsSpace extends OptionsExtensionSettingValues {
 
-  public ArgumentsSpace(Class<? extends Options<?>> declaringClass) {
-    super("program argument", OptionExtensionType.LOAD_FROM_ARGS, declaringClass);
+  public ArgumentsSpace() {
+    super("program argument", OptionExtensionType.LOAD_FROM_ARGS);
   }
 
   @Override

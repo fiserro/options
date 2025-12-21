@@ -2,7 +2,6 @@ package io.github.fiserro.options.extension;
 
 import com.google.common.base.Preconditions;
 import io.github.fiserro.options.OptionDef;
-import io.github.fiserro.options.Options;
 import io.github.fiserro.options.OptionsBuilder;
 import java.util.Arrays;
 import java.util.Objects;
@@ -17,9 +16,8 @@ public abstract class OptionsExtensionSettingValues extends AbstractOptionsExten
 
   private final String sourceType;
 
-  protected OptionsExtensionSettingValues(String sourceType, OptionExtensionType type,
-      Class<? extends Options<?>> declaringClass) {
-    super(type, declaringClass);
+  protected OptionsExtensionSettingValues(String sourceType, OptionExtensionType type) {
+    super(type);
     this.sourceType = sourceType;
   }
 
