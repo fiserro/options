@@ -4,7 +4,7 @@
 
   <groupId>io.github.fiserro</groupId>
   <artifactId>options</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2-SNAPSHOT</version>
   <name>Application Options Library</name>
   <description>A type-safe configuration library for Java that supports validation using Jakarta
     Bean Validation.
@@ -30,7 +30,7 @@
     <url>https://github.com/fiserro/options</url>
     <connection>scm:git:git://github.com/fiserro/options.git</connection>
     <developerConnection>scm:git:git@github.com:fiserro/options.git</developerConnection>
-    <tag>options-1.0.1</tag>
+    <tag>options-1.0.0</tag>
   </scm>
 
   <properties>
