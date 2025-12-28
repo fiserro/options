@@ -124,8 +124,15 @@ public class OptionsFactory {
                 .implement(optionsBuilder.optionsInterface());
 
         for (OptionDef optionDef : optionsBuilder.options()) {
+            // Always intercept withers - they must work even when using default values
+            if (optionDef.hasWither()) {
+                builder = builder.method(named(optionDef.wither().getName())
+                                .and(ElementMatchers.takesArguments(1)))
+                        .intercept(MethodDelegation.to(WithValueInterceptor.class));
+            }
+
             if (optionsBuilder.getValue(optionDef) == null && optionDef.hasDefaultMethod()) {
-                // do not intercept default methods when the value is not set
+                // do not intercept default getters when the value is not set
                 continue;
             }
             Object value = optionsBuilder.getValueOrPrimitiveDefault(optionDef);
@@ -144,12 +151,6 @@ public class OptionsFactory {
                     optionDef.javaType(), value == null ? null : value.getClass());
             builder = builder.method(named(optionDef.name()).and(takesNoArguments()))
                     .intercept(MethodDelegation.to(GetValueInterceptor.class));
-
-            if (optionDef.hasWither()) {
-                builder = builder.method(named(optionDef.wither().getName())
-                                .and(ElementMatchers.takesArguments(1)))
-                        .intercept(MethodDelegation.to(WithValueInterceptor.class));
-            }
         }
 
         try (Unloaded<?> unloaded = builder.make()) {

@@ -4,11 +4,21 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 import io.github.fiserro.options.extension.Envio;
+import io.github.fiserro.options.test.DefaultWithWither;
 import io.github.fiserro.options.test.StringsOptionsWith;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class WithValueTest {
+
+  @Test
+  void witherWorksWithDefaultMethod() {
+    DefaultWithWither state = OptionsFactory.create(DefaultWithWither.class);
+    assertThat("default value", state.value(), is(50));
+
+    DefaultWithWither modified = state.withValue(30);
+    assertThat("modified value", modified.value(), is(30));
+  }
 
   @Test
   void programArgumentsHasLowerPriorityThanWithValue() {
