@@ -28,8 +28,20 @@ public class OptionScanner {
   private void loadWithers(Class<?> clazz, Map<String, Method> withers) {
     Stream.of(clazz.getDeclaredMethods())
         .filter(m -> m.getName().startsWith("with"))
+        .filter(m -> m.getParameterCount() == 1)  // Valid withers have exactly 1 parameter
         .filter(m -> !withers.containsKey(nameOfWither(m)))
         .forEach(m -> withers.put(nameOfWither(m), m));
+  }
+
+  /**
+   * Recursively loads all wither methods from the class hierarchy.
+   * This ensures withers from parent interfaces are available when scanning child options.
+   */
+  private void loadAllWithers(Class<?> clazz, Map<String, Method> withers) {
+    loadWithers(clazz, withers);
+    for (Class<?> parent : clazz.getInterfaces()) {
+      loadAllWithers(parent, withers);
+    }
   }
 
   public static String nameOfWither(Method wither) {
@@ -38,7 +50,10 @@ public class OptionScanner {
   }
 
   Set<OptionDef> scan(Class<?> clazz) {
-    return scan(clazz, new HashMap<>(), OptionPath.empty());
+    // Load all withers from entire hierarchy first, so they're available when scanning child options
+    Map<String, Method> withers = new HashMap<>();
+    loadAllWithers(clazz, withers);
+    return scan(clazz, withers, OptionPath.empty());
   }
 
   private OptionDef optionDef(Method getter, Method wither, OptionPath path) {
